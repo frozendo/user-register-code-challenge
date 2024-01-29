@@ -1,6 +1,9 @@
 package com.swisscom.userregister.domain.entity;
 
+import com.swisscom.userregister.domain.convert.UserRoleConvert;
+import com.swisscom.userregister.domain.enums.RoleEnum;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,7 +15,7 @@ import jakarta.validation.constraints.Size;
 import java.util.Objects;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User {
 
     @Id
@@ -31,20 +34,17 @@ public class User {
     private String email;
 
     @NotNull
+    @Convert(converter = UserRoleConvert.class)
     @Column(name = "role")
-    private String role;
+    private RoleEnum role;
 
     public User() {
     }
 
-    public User(String name, String email, String role) {
+    public User(String name, String email, RoleEnum role) {
         this.name = name;
         this.email = email;
         this.role = role;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getName() {
@@ -55,7 +55,7 @@ public class User {
         return email;
     }
 
-    public String getRole() {
+    public RoleEnum getRole() {
         return role;
     }
 

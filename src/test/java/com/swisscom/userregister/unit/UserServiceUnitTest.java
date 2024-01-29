@@ -1,6 +1,7 @@
 package com.swisscom.userregister.unit;
 
 import com.swisscom.userregister.domain.entity.User;
+import com.swisscom.userregister.domain.enums.RoleEnum;
 import com.swisscom.userregister.domain.exceptions.BusinessException;
 import com.swisscom.userregister.repository.UserRepository;
 import com.swisscom.userregister.service.UserService;
@@ -29,7 +30,7 @@ class UserServiceUnitTest {
 
     @Test
     void testCreateUser() {
-        var user = new User("test", "test@email.com", "ADMIN");
+        var user = new User("test", "test@email.com", RoleEnum.ADMIN);
         userService.create(user);
 
         verify(userRepository, times(1)).save(user);
@@ -37,7 +38,7 @@ class UserServiceUnitTest {
 
     @Test
     void testCreateUserWhenEmailExist() {
-        var user = new User("test", "duplicate@email.com", "ADMIN");
+        var user = new User("test", "duplicate@email.com", RoleEnum.ADMIN);
 
         var dataException = new DataIntegrityViolationException("uk_user_email");
 

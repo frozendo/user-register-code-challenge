@@ -1,5 +1,6 @@
 package com.swisscom.userregister.controller.handler;
 
+import com.swisscom.userregister.domain.exceptions.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -21,6 +22,13 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(i -> new ExceptionObject(ex.getClass().getSimpleName(), i.getDefaultMessage()))
                 .toList();
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ResponseBody
+    public ExceptionObject handleBusinessException(BusinessException ex) {
+        return new ExceptionObject(ex.getClass().getSimpleName(), ex.getMessage());
     }
 
 

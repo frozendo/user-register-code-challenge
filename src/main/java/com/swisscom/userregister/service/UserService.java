@@ -4,9 +4,11 @@ import com.swisscom.userregister.domain.entity.User;
 import com.swisscom.userregister.domain.exceptions.BusinessException;
 import com.swisscom.userregister.repository.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class UserService {
 
     private final UserRepository userRepository;

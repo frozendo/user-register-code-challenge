@@ -8,6 +8,7 @@ import com.swisscom.userregister.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.jdbc.Sql;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -15,20 +16,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Sql(value = {"/scripts/user.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(value = {"/scripts/clear.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class UserControllerIntegrationTests extends IntegrationTests {
 
-    public static final String CREATE_ADMIN_USER_EMAIL = "createUser@email.com";
-    public static final String DEFAULT_ROLE_EMAIL = "usingDefaultRole@email.com";
-    public static final String COMMON_USER_EMAIL = "commonUser@email.com";
     public static final String DUPLICATE_EMAIL = "samgamgee@theshire.com";
+    public static final String USER_EMAIL = "test@email.com";
     public static final String USER_NAME = "test";
+
     @Autowired
     private UserRepository userRepository;
 
     @Test
     void testCreateAdminUser() {
 
-        var createUserRequest = new CreateUserRequest(USER_NAME, CREATE_ADMIN_USER_EMAIL, RoleEnum.ADMIN);
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.ADMIN);
 
         getRequest()
                 .body(getJson(createUserRequest))
@@ -38,9 +40,9 @@ class UserControllerIntegrationTests extends IntegrationTests {
                 .assertThat()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("name", equalTo(USER_NAME))
-                .body("email", equalTo(CREATE_ADMIN_USER_EMAIL));
+                .body("email", equalTo(USER_EMAIL));
 
-        var savedUser = userRepository.findByEmail(CREATE_ADMIN_USER_EMAIL);
+        var savedUser = userRepository.findByEmail(USER_EMAIL);
         assertTrue(savedUser.isPresent());
 
         var user = savedUser.get();
@@ -51,7 +53,7 @@ class UserControllerIntegrationTests extends IntegrationTests {
     @Test
     void testCreateCommonUser() {
 
-        var createUserRequest = new CreateUserRequest(USER_NAME, COMMON_USER_EMAIL, RoleEnum.COMMON);
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
 
         getRequest()
                 .body(getJson(createUserRequest))
@@ -61,9 +63,9 @@ class UserControllerIntegrationTests extends IntegrationTests {
                 .assertThat()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("name", equalTo(USER_NAME))
-                .body("email", equalTo(COMMON_USER_EMAIL));
+                .body("email", equalTo(USER_EMAIL));
 
-        var savedUser = userRepository.findByEmail(COMMON_USER_EMAIL);
+        var savedUser = userRepository.findByEmail(USER_EMAIL);
         assertTrue(savedUser.isPresent());
 
         var user = savedUser.get();
@@ -74,7 +76,7 @@ class UserControllerIntegrationTests extends IntegrationTests {
     @Test
     void testCreateUserWhenRoleIsNotInformed() {
 
-        var createUserRequest = new CreateUserRequest(USER_NAME, DEFAULT_ROLE_EMAIL, null);
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, null);
 
         getRequest()
                 .body(getJson(createUserRequest))
@@ -84,9 +86,9 @@ class UserControllerIntegrationTests extends IntegrationTests {
                 .assertThat()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("name", equalTo(USER_NAME))
-                .body("email", equalTo(DEFAULT_ROLE_EMAIL));
+                .body("email", equalTo(USER_EMAIL));
 
-        var savedUser = userRepository.findByEmail(DEFAULT_ROLE_EMAIL);
+        var savedUser = userRepository.findByEmail(USER_EMAIL);
         assertTrue(savedUser.isPresent());
 
         var user = savedUser.get();
@@ -107,10 +109,9 @@ class UserControllerIntegrationTests extends IntegrationTests {
                 .log().all()
                 .assertThat()
                 .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
-                .body("name", equalTo("BusinessException"))
                 .body("message", equalTo(expectedMessage));
 
-        var savedUser = userRepository.findByEmail(CREATE_ADMIN_USER_EMAIL);
+        var savedUser = userRepository.findByEmail(DUPLICATE_EMAIL);
         assertTrue(savedUser.isPresent());
     }
 
@@ -143,6 +144,17 @@ class UserControllerIntegrationTests extends IntegrationTests {
                 .assertThat()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .body("size", hasSize(2));
+    }
+
+    @Test
+    void testListUsers() {
+        getRequest()
+                .get(UserController.PATH)
+                .then()
+                .log().all()
+                .assertThat()
+                .statusCode(HttpStatus.OK.value())
+                .body("size", hasSize(4));
     }
 
 }

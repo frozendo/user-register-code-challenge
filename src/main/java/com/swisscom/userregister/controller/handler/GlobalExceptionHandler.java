@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
         return ex.getBindingResult()
                 .getAllErrors()
                 .stream()
-                .map(i -> new ExceptionObject(ex.getClass().getSimpleName(), i.getDefaultMessage()))
+                .map(i -> new ExceptionObject(i.getDefaultMessage()))
                 .toList();
     }
 
@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ResponseBody
     public ExceptionObject handleBusinessException(BusinessException ex) {
-        return new ExceptionObject(ex.getClass().getSimpleName(), ex.getMessage());
+        return new ExceptionObject(ex.getMessage());
     }
 
 

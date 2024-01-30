@@ -59,6 +59,10 @@ public class User {
         return role;
     }
 
+    public String getRoleName() {
+        return role.name();
+    }
+
     @Override
     public String toString() {
         return "User{" +

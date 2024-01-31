@@ -2,6 +2,7 @@ package com.swisscom.userregister.integationtest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swisscom.userregister.config.IntegrationTests;
+import com.swisscom.userregister.config.properties.OpaServerProperties;
 import com.swisscom.userregister.controller.UserController;
 import com.swisscom.userregister.domain.entity.User;
 import com.swisscom.userregister.domain.enums.RoleEnum;
@@ -11,7 +12,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -42,11 +42,8 @@ class UserControllerIntegrationTests extends IntegrationTests {
     @Autowired
     private ObjectMapper mapper;
 
-    @Value("${opa.server}")
-    private String opaServer;
-
-    @Value("${opa.users-endpoint}")
-    private String usersEndpoint;
+    @Autowired
+    private OpaServerProperties opaServerProperties;
 
     @Test
     void testListUsers() {
@@ -61,7 +58,6 @@ class UserControllerIntegrationTests extends IntegrationTests {
 
     @Test
     void testCreateUserWhenParameterDataIsNull() {
-
         var createUserRequest = new CreateUserRequest(null, null, null);
 
         getRequest()
@@ -77,7 +73,6 @@ class UserControllerIntegrationTests extends IntegrationTests {
 
     @Test
     void testCreateUserWhenParameterDataIsEmpty() {
-
         var createUserRequest = new CreateUserRequest("", "", null);
 
         getRequest()
@@ -92,7 +87,6 @@ class UserControllerIntegrationTests extends IntegrationTests {
 
     @Test
     void testCreateAdminUser() {
-
         var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.ADMIN);
 
         getRequest()
@@ -115,7 +109,6 @@ class UserControllerIntegrationTests extends IntegrationTests {
 
     @Test
     void testCreateCommonUser() {
-
         var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
 
         getRequest()
@@ -137,8 +130,7 @@ class UserControllerIntegrationTests extends IntegrationTests {
     }
 
     @Test
-    void testCreateUserWhenRoleIsNotInformed() {
-
+    void testCreateUserWhenRoleWasNotInformed() {
         var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, null);
 
         getRequest()
@@ -161,7 +153,6 @@ class UserControllerIntegrationTests extends IntegrationTests {
 
     @Test
     void testCreateUserWhenEmailAlreadyExist() {
-
         var createUserRequest = new CreateUserRequest(USER_NAME, DUPLICATE_EMAIL, RoleEnum.ADMIN);
         var expectedMessage = "Email %s already exist!".formatted(DUPLICATE_EMAIL);
 
@@ -180,7 +171,6 @@ class UserControllerIntegrationTests extends IntegrationTests {
 
     @Test
     void testUserSynchronizedToOpaServer() throws JSONException {
-
         var createUserRequest = new CreateUserRequest(USER_NAME, SYNCHRONIZE_EMAIL, RoleEnum.ADMIN);
 
         getRequest()
@@ -206,8 +196,10 @@ class UserControllerIntegrationTests extends IntegrationTests {
     }
 
     private Optional<User> getSynchronizeEmailInOpaServer() throws JSONException {
+        var server = opaServerProperties.server();
+        var endpoint = opaServerProperties.usersEndpoint();
         var usersJson = client.get()
-                .uri(opaServer.concat(usersEndpoint))
+                .uri(server.concat(endpoint))
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();

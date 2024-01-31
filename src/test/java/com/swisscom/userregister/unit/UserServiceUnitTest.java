@@ -4,7 +4,7 @@ import com.swisscom.userregister.domain.entity.User;
 import com.swisscom.userregister.domain.enums.RoleEnum;
 import com.swisscom.userregister.domain.exceptions.BusinessException;
 import com.swisscom.userregister.repository.UserRepository;
-import com.swisscom.userregister.service.OpaUserService;
+import com.swisscom.userregister.service.OpaServerService;
 import com.swisscom.userregister.service.UserService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -26,13 +26,13 @@ import static org.mockito.Mockito.when;
 class UserServiceUnitTest {
 
     private final UserRepository userRepository;
-    private final OpaUserService opaUserService;
+    private final OpaServerService opaServerService;
     private final UserService userService;
 
     public UserServiceUnitTest() {
         this.userRepository = mock(UserRepository.class);
-        this.opaUserService = mock(OpaUserService.class);
-        this.userService = new UserService(userRepository, opaUserService);
+        this.opaServerService = mock(OpaServerService.class);
+        this.userService = new UserService(userRepository, opaServerService);
     }
 
     @Test
@@ -48,7 +48,7 @@ class UserServiceUnitTest {
         userService.createAndSendToOpa(userEve);
 
         verify(userRepository, times(1)).save(userEve);
-        verify(opaUserService, times(1)).synchronizedUserToOpa(users);
+        verify(opaServerService, times(1)).synchronizedUserToOpa(users);
         verify(userRepository, times(1)).findAll();
     }
 
@@ -71,7 +71,7 @@ class UserServiceUnitTest {
 
         verify(userRepository, times(1)).save(user);
         verifyNoMoreInteractions(userRepository);
-        verifyNoInteractions(opaUserService);
+        verifyNoInteractions(opaServerService);
 
     }
 

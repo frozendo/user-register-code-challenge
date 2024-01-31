@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +24,8 @@ import java.io.IOException;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = UserRegisterApplication.class)
 public abstract class IntegrationTests {
 
+    private static final String AUTHORIZATION_DEFAULT_EMAIL = "gandalf@whitewizard.com";
+
     @LocalServerPort
     private Integer port;
 
@@ -32,19 +35,24 @@ public abstract class IntegrationTests {
     @Autowired
     private OpaServerConfiguration opaServerConfiguration;
 
-    private static boolean shouldConfigureOpaServer = true;
+    private static boolean shouldConfigureOpaServerTest = true;
 
     @BeforeEach
     void configureOpaServerForTest() throws IOException {
-        if (shouldConfigureOpaServer) {
+        if (shouldConfigureOpaServerTest) {
             opaServerConfiguration.configureServer();
-            shouldConfigureOpaServer = false;
+            shouldConfigureOpaServerTest = false;
         }
     }
 
     protected RequestSpecification getRequest() {
+        return getRequest(AUTHORIZATION_DEFAULT_EMAIL);
+    }
+
+    protected RequestSpecification getRequest(String email) {
         var spec = new RequestSpecBuilder()
                 .setContentType(ContentType.JSON)
+                .addHeader(HttpHeaders.AUTHORIZATION, email)
                 .build();
         return RestAssured.given()
                 .when()

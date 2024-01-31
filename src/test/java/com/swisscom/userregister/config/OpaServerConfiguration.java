@@ -1,5 +1,7 @@
 package com.swisscom.userregister.config;
 
+import com.swisscom.userregister.config.properties.OpaServerProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
@@ -24,17 +26,8 @@ public class OpaServerConfiguration {
     @Value("classpath:opa-resources/user_roles.json")
     private Resource userJsonFile;
 
-    @Value("${opa.server}")
-    private String opaServer;
-
-    @Value("${opa.policy-endpoint}")
-    private String policyEndpoint;
-
-    @Value("${opa.roles-endpoint}")
-    private String rolesEndpoint;
-
-    @Value("${opa.users-endpoint}")
-    private String usersEndpoint;
+    @Autowired
+    private OpaServerProperties opaServerProperties;
 
     public void configureServer() throws IOException {
         configurePolicy();
@@ -45,24 +38,24 @@ public class OpaServerConfiguration {
     private void configurePolicy() throws IOException {
         Reader reader = new InputStreamReader(userPolicyFile.getInputStream(), StandardCharsets.UTF_8);
         String policyData = FileCopyUtils.copyToString(reader);
-        executeRequest(policyData, policyEndpoint);
+        executeRequest(policyData, opaServerProperties.policyEndpoint());
     }
 
     private void configureRolesGranted() throws IOException {
         Reader reader = new InputStreamReader(roleJsonFile.getInputStream(), StandardCharsets.UTF_8);
         String policyData = FileCopyUtils.copyToString(reader);
-        executeRequest(policyData, rolesEndpoint);
+        executeRequest(policyData, opaServerProperties.rolesEndpoint());
     }
 
     private void configureUserRoles() throws IOException {
         Reader reader = new InputStreamReader(userJsonFile.getInputStream(), StandardCharsets.UTF_8);
         String policyData = FileCopyUtils.copyToString(reader);
-        executeRequest(policyData, usersEndpoint);
+        executeRequest(policyData, opaServerProperties.usersEndpoint());
     }
 
     private void executeRequest(String policyData, String endpoint) {
         var client = WebClient.builder().build();
-        var uri = "%s%s".formatted(opaServer, endpoint);
+        var uri = opaServerProperties.server().concat(endpoint);
 
         client.put()
                 .uri(uri)

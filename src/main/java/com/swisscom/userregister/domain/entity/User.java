@@ -60,7 +60,7 @@ public class User {
     }
 
     public String getRoleName() {
-        return role.name();
+        return role.name().toLowerCase();
     }
 
     @Override

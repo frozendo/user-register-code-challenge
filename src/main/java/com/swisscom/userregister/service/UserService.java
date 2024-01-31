@@ -12,11 +12,11 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final OpaUserService opaUserService;
+    private final OpaServerService opaServerService;
 
-    public UserService(UserRepository userRepository, OpaUserService opaUserService) {
+    public UserService(UserRepository userRepository, OpaServerService opaServerService) {
         this.userRepository = userRepository;
-        this.opaUserService = opaUserService;
+        this.opaServerService = opaServerService;
     }
 
     public List<User> listUsers() {
@@ -36,7 +36,7 @@ public class UserService {
 
     private void synchronizeUsersToOpa() {
         var users = listUsers();
-        opaUserService.synchronizedUserToOpa(users);
+        opaServerService.synchronizedUserToOpa(users);
     }
 
     private void dataIntegrityException(User user, DataIntegrityViolationException ex) {

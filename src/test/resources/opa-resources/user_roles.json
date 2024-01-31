@@ -1,1 +1,6 @@
-{"Gandalf": "admin","Frodo Baggins": "admin", "Samwise Gamgee": "common","Fangorn": "common"}
+{
+  "gandalf@whitewizard.com": "admin",
+  "frodo.baggins@theshire.com": "admin",
+  "samgamgee@theshire.com": "common",
+  "fangorn@email.com": "common"
+}

@@ -1,4 +1,0 @@
-opa:
-  policy-endpoint: '/v1/policies/register'
-  roles-endpoint: '/v1/data/role_grants'
-  users-endpoint: '/v1/data/user_roles'

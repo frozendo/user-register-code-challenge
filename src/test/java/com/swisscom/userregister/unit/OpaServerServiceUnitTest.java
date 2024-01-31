@@ -70,7 +70,7 @@ class OpaServerServiceUnitTest {
 
         when(responseSpec.bodyToMono(String.class)).thenReturn(mono);
 
-        opaServerService.synchronizedUserToOpa(users);
+        opaServerService.synchronizeUsersToOpa(users);
 
         verify(webClient, times(1)).put();
     }

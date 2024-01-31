@@ -48,7 +48,7 @@ class UserServiceUnitTest {
         userService.createAndSendToOpa(userEve);
 
         verify(userRepository, times(1)).save(userEve);
-        verify(opaServerService, times(1)).synchronizedUserToOpa(users);
+        verify(opaServerService, times(1)).synchronizeUsersToOpa(users);
         verify(userRepository, times(1)).findAll();
     }
 

@@ -3,6 +3,8 @@ package com.swisscom.userregister.service;
 import com.swisscom.userregister.config.properties.OpaServerProperties;
 import com.swisscom.userregister.domain.entity.User;
 import com.swisscom.userregister.domain.enums.ApiActionEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -13,6 +15,8 @@ import java.util.List;
 @Service
 public class OpaServerService {
 
+    private static final Logger logger = LoggerFactory.getLogger(OpaServerService.class);
+
     private final WebClient client;
     private final OpaServerProperties opaServerProperties;
 
@@ -22,13 +26,15 @@ public class OpaServerService {
         this.opaServerProperties = opaServerProperties;
     }
 
-    public void synchronizedUserToOpa(List<User> users) {
+    public void synchronizeUsersToOpa(List<User> users) {
         var usersJson = getSynchronizeRequestJson(users);
+        logger.info("Synchronize users to OPA server");
         executePutRequest(usersJson, opaServerProperties.getUserDataUri());
     }
 
     public boolean authorizeUserAction(String email, ApiActionEnum action) {
         var authorizeJson = getAuthorizeRequestJson(email, action);
+        logger.info("Send request to OPA server to authorize user {}", email);
         var response = executePostRequest(authorizeJson, opaServerProperties.getAuthorizeUri());
         return getAuthorizeResponse(response);
     }

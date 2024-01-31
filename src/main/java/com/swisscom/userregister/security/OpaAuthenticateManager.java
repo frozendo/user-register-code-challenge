@@ -3,6 +3,8 @@ package com.swisscom.userregister.security;
 import com.swisscom.userregister.domain.enums.ApiActionEnum;
 import com.swisscom.userregister.service.OpaServerService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authorization.AuthorizationDecision;
@@ -15,6 +17,8 @@ import java.util.function.Supplier;
 
 @Component
 public class OpaAuthenticateManager implements AuthorizationManager<RequestAuthorizationContext> {
+
+    private static final Logger logger = LoggerFactory.getLogger(OpaAuthenticateManager.class);
 
     private final OpaServerService opaServerService;
 
@@ -33,11 +37,16 @@ public class OpaAuthenticateManager implements AuthorizationManager<RequestAutho
                                        RequestAuthorizationContext requestAuthorizationContext) {
         var request = requestAuthorizationContext.getRequest();
         var headerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
+        var requestUri = request.getRequestURI();
         if (headerToken == null || headerToken.isEmpty()) {
+            logger.warn("Header token not provided! Deny request");
             return new AuthorizationDecision(false);
         }
         var action = defineAction(request);
+        logger.info("Check {} authorization to perform the {} action", headerToken, action);
         var authorizationResult = opaServerService.authorizeUserAction(headerToken, action);
+
+        logger.info("User {} is authorized by the server to perform the {} the uri {}", headerToken, action, requestUri);
         return new AuthorizationDecision(authorizationResult);
     }
 

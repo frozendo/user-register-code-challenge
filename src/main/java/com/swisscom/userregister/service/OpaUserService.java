@@ -1,54 +1,44 @@
 package com.swisscom.userregister.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.swisscom.userregister.config.properties.OpaServerProperties;
 import com.swisscom.userregister.domain.entity.User;
-import com.swisscom.userregister.domain.exceptions.BusinessException;
-import com.swisscom.userregister.domain.request.OpaUserRequest;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.json.JSONObject;
 
 import java.util.List;
 
+@Service
 public class OpaUserService {
 
-    private final ObjectMapper objectMapper;
     private final WebClient client;
-    private String opaServer;
-    private String usersEndpoint;
+    private final OpaServerProperties opaServerProperties;
 
-    public OpaUserService(ObjectMapper objectMapper,
-                          WebClient webClient,
-                          String opaServer,
-                          String usersEndpoint) {
-        this.objectMapper = objectMapper;
+    public OpaUserService(WebClient webClient,
+                          OpaServerProperties opaServerProperties) {
         this.client = webClient;
-        this.opaServer = opaServer;
-        this.usersEndpoint = usersEndpoint;
+        this.opaServerProperties = opaServerProperties;
     }
 
     public void synchronizedUserToOpa(List<User> users) {
-        try {
-            var usersJson = getRequestJson(users);
-            executeRequest(usersJson);
-        } catch (JsonProcessingException e) {
-            throw new BusinessException("Error on synchronizing users to OPA server");
-        }
+        var usersJson = getRequestJson(users);
+        executeRequest(usersJson);
     }
 
-    private String getRequestJson(List<User> users) throws JsonProcessingException {
-        List<OpaUserRequest> requests = users.stream().map(user ->
-                new OpaUserRequest(user.getEmail(), user.getRoleName())
-        ).toList();
+    private String getRequestJson(List<User> users) {
+        var jsonObject = new JSONObject();
 
-        return objectMapper.writeValueAsString(requests);
+        for (User user : users) {
+            jsonObject.put(user.getEmail(), user.getRole());
+        }
+
+        return jsonObject.toString();
     }
 
     private void executeRequest(String usersJson) {
-        var uri = "%s%s".formatted(opaServer, usersEndpoint);
-
-        client.post()
-                .uri(uri)
+        client.put()
+                .uri(opaServerProperties.getUserDataUri())
                 .accept(MediaType.ALL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(usersJson)

@@ -12,22 +12,31 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final OpaUserService opaUserService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, OpaUserService opaUserService) {
         this.userRepository = userRepository;
+        this.opaUserService = opaUserService;
     }
 
     public List<User> listUsers() {
         return userRepository.findAll();
     }
 
-    public User create(User user) {
+    public User createAndSendToOpa(User user) {
         try {
-            return userRepository.save(user);
+            var savedUser = userRepository.save(user);
+            synchronizeUsersToOpa();
+            return savedUser;
         } catch (DataIntegrityViolationException ex) {
             dataIntegrityException(user, ex);
             throw ex;
         }
+    }
+
+    private void synchronizeUsersToOpa() {
+        var users = listUsers();
+        opaUserService.synchronizedUserToOpa(users);
     }
 
     private void dataIntegrityException(User user, DataIntegrityViolationException ex) {

@@ -30,7 +30,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
         var entity = createUserRequest.convertToEntity();
-        return new UserResponse(userService.create(entity));
+        return new UserResponse(userService.createAndSendToOpa(entity));
     }
 
     @GetMapping

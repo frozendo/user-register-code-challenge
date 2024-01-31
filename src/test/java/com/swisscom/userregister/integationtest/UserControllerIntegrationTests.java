@@ -1,14 +1,22 @@
 package com.swisscom.userregister.integationtest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swisscom.userregister.config.IntegrationTests;
 import com.swisscom.userregister.controller.UserController;
+import com.swisscom.userregister.domain.entity.User;
 import com.swisscom.userregister.domain.enums.RoleEnum;
 import com.swisscom.userregister.domain.request.CreateUserRequest;
 import com.swisscom.userregister.repository.UserRepository;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -22,10 +30,65 @@ class UserControllerIntegrationTests extends IntegrationTests {
 
     public static final String DUPLICATE_EMAIL = "samgamgee@theshire.com";
     public static final String USER_EMAIL = "test@email.com";
+    public static final String SYNCHRONIZE_EMAIL = "validateSynchroinizeToOpa@test.com";
     public static final String USER_NAME = "test";
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private WebClient client;
+
+    @Autowired
+    private ObjectMapper mapper;
+
+    @Value("${opa.server}")
+    private String opaServer;
+
+    @Value("${opa.users-endpoint}")
+    private String usersEndpoint;
+
+    @Test
+    void testListUsers() {
+        getRequest()
+                .get(UserController.PATH)
+                .then()
+                .log().all()
+                .assertThat()
+                .statusCode(HttpStatus.OK.value())
+                .body("size", hasSize(4));
+    }
+
+    @Test
+    void testCreateUserWhenParameterDataIsNull() {
+
+        var createUserRequest = new CreateUserRequest(null, null, null);
+
+        getRequest()
+                .body(getJson(createUserRequest))
+                .post(UserController.PATH)
+                .then()
+                .log().all()
+                .assertThat()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("size", hasSize(2));
+
+    }
+
+    @Test
+    void testCreateUserWhenParameterDataIsEmpty() {
+
+        var createUserRequest = new CreateUserRequest("", "", null);
+
+        getRequest()
+                .body(getJson(createUserRequest))
+                .post(UserController.PATH)
+                .then()
+                .log().all()
+                .assertThat()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("size", hasSize(2));
+    }
 
     @Test
     void testCreateAdminUser() {
@@ -116,25 +179,9 @@ class UserControllerIntegrationTests extends IntegrationTests {
     }
 
     @Test
-    void testCreateUserWhenParameterDataIsNull() {
+    void testUserSynchronizedToOpaServer() throws JSONException {
 
-        var createUserRequest = new CreateUserRequest(null, null, null);
-
-        getRequest()
-                .body(getJson(createUserRequest))
-                .post(UserController.PATH)
-                .then()
-                .log().all()
-                .assertThat()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("size", hasSize(2));
-
-    }
-
-    @Test
-    void testCreateUserWhenParameterDataIsEmpty() {
-
-        var createUserRequest = new CreateUserRequest("", "", null);
+        var createUserRequest = new CreateUserRequest(USER_NAME, SYNCHRONIZE_EMAIL, RoleEnum.ADMIN);
 
         getRequest()
                 .body(getJson(createUserRequest))
@@ -142,19 +189,41 @@ class UserControllerIntegrationTests extends IntegrationTests {
                 .then()
                 .log().all()
                 .assertThat()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("size", hasSize(2));
+                .statusCode(HttpStatus.CREATED.value())
+                .body("name", equalTo(USER_NAME))
+                .body("email", equalTo(SYNCHRONIZE_EMAIL));
+
+        var savedUser = userRepository.findByEmail(SYNCHRONIZE_EMAIL);
+        assertTrue(savedUser.isPresent());
+
+        var user = savedUser.get();
+        assertNotNull(user.getRole());
+        assertEquals(RoleEnum.ADMIN, user.getRole());
+
+        var userFromOpa = getSynchronizeEmailInOpaServer();
+        assertTrue(userFromOpa.isPresent());
+        assertEquals(RoleEnum.ADMIN, userFromOpa.get().getRole());
     }
 
-    @Test
-    void testListUsers() {
-        getRequest()
-                .get(UserController.PATH)
-                .then()
-                .log().all()
-                .assertThat()
-                .statusCode(HttpStatus.OK.value())
-                .body("size", hasSize(4));
+    private Optional<User> getSynchronizeEmailInOpaServer() throws JSONException {
+        var usersJson = client.get()
+                .uri(opaServer.concat(usersEndpoint))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+        var responseArray = new JSONObject(usersJson);
+        var results = responseArray.getJSONObject("result");
+
+        for (int i = 0; i < results.names().length(); i++) {
+            var key = results.names().getString(i);
+            if (SYNCHRONIZE_EMAIL.equals(key)) {
+                var value = results.getString(key);
+                return Optional.of(new User("", key, RoleEnum.getEnumValue(value)));
+            }
+        }
+
+        return Optional.empty();
     }
 
 }

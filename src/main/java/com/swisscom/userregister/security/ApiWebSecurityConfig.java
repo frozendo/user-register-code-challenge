@@ -23,9 +23,13 @@ public class ApiWebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request ->
-                        request.anyRequest()
-                                .access(opaAuthenticateManager)
+                .authorizeHttpRequests(request -> {
+                            request.requestMatchers("/actuator/**").permitAll();
+                            request.requestMatchers("/error").permitAll();
+                            request.requestMatchers("/favicon.ico").permitAll();
+                            request.anyRequest()
+                                    .access(opaAuthenticateManager);
+                        }
                 );
         return http.build();
     }

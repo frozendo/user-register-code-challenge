@@ -29,7 +29,8 @@ public class OpaServerService {
     public void synchronizeUsersToOpa(List<User> users) {
         var usersJson = getSynchronizeRequestJson(users);
         logger.info("Synchronize users to OPA server");
-        executePutRequest(usersJson, opaServerProperties.getUserDataUri());
+        var uri = opaServerProperties.getUserRolesUri();
+        executePutRequest(usersJson, uri);
     }
 
     public boolean authorizeUserAction(String email, ApiActionEnum action) {
@@ -40,13 +41,13 @@ public class OpaServerService {
     }
 
     private String getSynchronizeRequestJson(List<User> users) {
-        var jsonObject = new JSONObject();
+        var userObject = new JSONObject();
 
         for (User user : users) {
-            jsonObject.put(user.getEmail(), user.getRoleName());
+            userObject.put(user.getEmail(), user.getRoleName());
         }
 
-        return jsonObject.toString();
+        return userObject.toString();
     }
 
     private String getAuthorizeRequestJson(String email, ApiActionEnum action) {
@@ -63,7 +64,10 @@ public class OpaServerService {
 
     private boolean getAuthorizeResponse(String response) {
         var jsonObject = new JSONObject(response);
-        return jsonObject.getBoolean("result");
+        if (jsonObject.has("result")) {
+            return jsonObject.getBoolean("result");
+        }
+        return false;
     }
 
     private void executePutRequest(String usersJson, String uri) {

@@ -41,8 +41,8 @@ class OpaServerServiceUnitTest {
     private static OpaServerProperties createOpaServerProperties() {
         return new OpaServerProperties("localhsot:8080",
                 "/v1/policies/register",
-                "/v1/data/role_grants",
-                "/v1/data/user_roles",
+                "/v1/data",
+                "/user_roles",
                 "/v1/data/users/register/allow");
     }
 
@@ -93,6 +93,21 @@ class OpaServerServiceUnitTest {
     @Test
     void testAuthorizeUserActionWhenUserHasNoRight() {
         var response = "{'result':false}";
+        Mono<String> mono = Mono.just(response);
+
+        when(responseSpec.bodyToMono(String.class)).thenReturn(mono);
+
+        var result = opaServerService.authorizeUserAction("alice@email.com", ApiActionEnum.READ);
+
+        assertFalse(result);
+
+        verify(webClient, times(1)).post();
+
+    }
+
+    @Test
+    void testAuthorizeUserActionWhenResponseIsEmpty() {
+        var response = "{}";
         Mono<String> mono = Mono.just(response);
 
         when(responseSpec.bodyToMono(String.class)).thenReturn(mono);

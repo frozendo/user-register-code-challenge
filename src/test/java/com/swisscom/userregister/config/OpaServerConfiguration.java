@@ -20,19 +20,15 @@ public class OpaServerConfiguration {
     @Value("classpath:opa-resources/user_policy.rego")
     private Resource userPolicyFile;
 
-    @Value("classpath:opa-resources/role_grants.json")
-    private Resource roleJsonFile;
-
-    @Value("classpath:opa-resources/user_roles.json")
-    private Resource userJsonFile;
+    @Value("classpath:opa-resources/opa_data.json")
+    private Resource opaDataFile;
 
     @Autowired
     private OpaServerProperties opaServerProperties;
 
     public void configureServer() throws IOException {
         configurePolicy();
-        configureRolesGranted();
-        configureUserRoles();
+        configureData();
     }
 
     private void configurePolicy() throws IOException {
@@ -41,16 +37,10 @@ public class OpaServerConfiguration {
         executeRequest(policyData, opaServerProperties.policyEndpoint());
     }
 
-    private void configureRolesGranted() throws IOException {
-        Reader reader = new InputStreamReader(roleJsonFile.getInputStream(), StandardCharsets.UTF_8);
-        String policyData = FileCopyUtils.copyToString(reader);
-        executeRequest(policyData, opaServerProperties.rolesEndpoint());
-    }
-
-    private void configureUserRoles() throws IOException {
-        Reader reader = new InputStreamReader(userJsonFile.getInputStream(), StandardCharsets.UTF_8);
-        String policyData = FileCopyUtils.copyToString(reader);
-        executeRequest(policyData, opaServerProperties.usersEndpoint());
+    private void configureData() throws IOException {
+        Reader reader = new InputStreamReader(opaDataFile.getInputStream(), StandardCharsets.UTF_8);
+        String opaData = FileCopyUtils.copyToString(reader);
+        executeRequest(opaData, opaServerProperties.dataEndpoint());
     }
 
     private void executeRequest(String policyData, String endpoint) {

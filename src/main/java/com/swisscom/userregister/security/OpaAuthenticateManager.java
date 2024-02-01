@@ -36,8 +36,13 @@ public class OpaAuthenticateManager implements AuthorizationManager<RequestAutho
     public AuthorizationDecision check(Supplier<Authentication> authentication,
                                        RequestAuthorizationContext requestAuthorizationContext) {
         var request = requestAuthorizationContext.getRequest();
-        var headerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
         var requestUri = request.getRequestURI();
+
+        if (requestUri.contains("/error")) {
+            logger.warn("Uri don't need authorization");
+            return new AuthorizationDecision(true);
+        }
+        var headerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (headerToken == null || headerToken.isEmpty()) {
             logger.warn("Header token not provided! Deny request");
             return new AuthorizationDecision(false);
@@ -46,7 +51,8 @@ public class OpaAuthenticateManager implements AuthorizationManager<RequestAutho
         logger.info("Check {} authorization to perform the {} action", headerToken, action);
         var authorizationResult = opaServerService.authorizeUserAction(headerToken, action);
 
-        logger.info("User {} is authorized by the server to perform the {} the uri {}", headerToken, action, requestUri);
+        logger.info("User {} is authorized = {} to perform the {} the uri {}",
+                headerToken, authorizationResult, action, requestUri);
         return new AuthorizationDecision(authorizationResult);
     }
 

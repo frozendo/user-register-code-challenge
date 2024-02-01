@@ -5,12 +5,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "opa")
 public record OpaServerProperties(String server,
                                   String policyEndpoint,
-                                  String rolesEndpoint,
-                                  String usersEndpoint,
+                                  String dataEndpoint,
+                                  String userRolesEndpoint,
                                   String authorizeEndpoint) {
 
-    public String getUserDataUri() {
-        return server.concat(usersEndpoint);
+    public String getUserRolesUri() {
+        return server.concat(dataEndpoint).concat(userRolesEndpoint);
     }
 
     public String getAuthorizeUri() {

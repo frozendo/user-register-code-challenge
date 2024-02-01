@@ -196,10 +196,9 @@ class UserControllerIntegrationTests extends IntegrationTests {
     }
 
     private Optional<User> getSynchronizeEmailInOpaServer() throws JSONException {
-        var server = opaServerProperties.server();
-        var endpoint = opaServerProperties.usersEndpoint();
+        var uri = opaServerProperties.getUserRolesUri();
         var usersJson = client.get()
-                .uri(server.concat(endpoint))
+                .uri(uri)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();

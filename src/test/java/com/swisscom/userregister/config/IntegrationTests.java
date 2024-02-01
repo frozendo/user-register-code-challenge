@@ -61,6 +61,20 @@ public abstract class IntegrationTests {
                 .port(port);
     }
 
+    protected RequestSpecification getRequest(String email, String password) {
+        var spec = new RequestSpecBuilder()
+                .setContentType(ContentType.JSON)
+                .build();
+        return RestAssured.given()
+                .auth()
+                .preemptive()
+                .basic(email, password)
+                .when()
+                .spec(spec)
+                .log().all()
+                .port(port);
+    }
+
     protected String getJson(Object object) {
         try {
             return mapper.writeValueAsString(object);

@@ -5,5 +5,13 @@ CREATE TABLE users (
   role char(1)
 );
 
+CREATE TABLE session (
+    id serail PRIMARY KEY,
+    token varchar(32);
+    updated_at datetime,
+    expiration_at datetime,
+    email varchar(50)
+);
+
 CREATE UNIQUE INDEX uk_user_email ON users (email);
 

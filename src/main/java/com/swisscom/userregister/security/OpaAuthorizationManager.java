@@ -16,13 +16,13 @@ import org.springframework.stereotype.Component;
 import java.util.function.Supplier;
 
 @Component
-public class OpaAuthenticateManager implements AuthorizationManager<RequestAuthorizationContext> {
+public class OpaAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 
-    private static final Logger logger = LoggerFactory.getLogger(OpaAuthenticateManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(OpaAuthorizationManager.class);
 
     private final OpaServerService opaServerService;
 
-    public OpaAuthenticateManager(OpaServerService opaServerService) {
+    public OpaAuthorizationManager(OpaServerService opaServerService) {
         this.opaServerService = opaServerService;
     }
 
@@ -36,21 +36,18 @@ public class OpaAuthenticateManager implements AuthorizationManager<RequestAutho
     public AuthorizationDecision check(Supplier<Authentication> authentication,
                                        RequestAuthorizationContext requestAuthorizationContext) {
         var request = requestAuthorizationContext.getRequest();
-        var requestUri = request.getRequestURI();
-
-        if (requestUri.contains("/error")) {
-            logger.warn("Uri don't need authorization");
-            return new AuthorizationDecision(true);
-        }
         var headerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (headerToken == null || headerToken.isEmpty()) {
             logger.warn("Header token not provided! Deny request");
             return new AuthorizationDecision(false);
         }
+
         var action = defineAction(request);
+
         logger.info("Check {} authorization to perform the {} action", headerToken, action);
         var authorizationResult = opaServerService.authorizeUserAction(headerToken, action);
 
+        var requestUri = request.getRequestURI();
         logger.info("User {} is authorized = {} to perform the {} the uri {}",
                 headerToken, authorizationResult, action, requestUri);
         return new AuthorizationDecision(authorizationResult);

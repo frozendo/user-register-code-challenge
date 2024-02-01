@@ -46,6 +46,7 @@ public class ApiWebSecurityConfig {
                             request.requestMatchers("/actuator/**").permitAll();
                             request.requestMatchers("/error").permitAll();
                             request.requestMatchers("/favicon.ico").permitAll();
+                            request.requestMatchers("/authentication/**").permitAll();
                             request.requestMatchers("**")
                                     .access(opaAuthenticateManager);
                         }

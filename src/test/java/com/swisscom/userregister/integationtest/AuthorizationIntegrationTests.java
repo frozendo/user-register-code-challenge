@@ -31,7 +31,7 @@ class AuthorizationIntegrationTests extends IntegrationTests {
                 .log().all()
                 .assertThat()
                 .statusCode(HttpStatus.OK.value())
-                .body("size", hasSize(4));
+                .body("size", hasSize(5));
     }
 
     @Test
@@ -42,7 +42,7 @@ class AuthorizationIntegrationTests extends IntegrationTests {
                 .log().all()
                 .assertThat()
                 .statusCode(HttpStatus.OK.value())
-                .body("size", hasSize(4));
+                .body("size", hasSize(5));
     }
 
     @Test

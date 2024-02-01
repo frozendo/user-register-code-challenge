@@ -1,0 +1,10 @@
+services:
+  logger:
+    url: http://10.96.140.83:9000/authentication
+
+decision_logs:
+  # console: true
+  service: logger
+  reporting:
+    min_delay_seconds: 5
+    max_delay_seconds: 10

@@ -28,6 +28,8 @@ spec:
             - "--server"
             - "/policies"
             - "/data"
+            - "-c"
+            - "/server/config.yml"
           volumeMounts:
             - readOnly: true
               mountPath: /policies
@@ -35,6 +37,9 @@ spec:
             - readOnly: true
               mountPath: /data
               name: opa-server-data
+            - readOnly: true
+              mountPath: /server
+              name: opa-server-config
           livenessProbe:
             httpGet:
               path: /health
@@ -54,4 +59,7 @@ spec:
         - name: opa-server-data
           configMap:
             name: opa-server-data
+        - name: opa-server-config
+          configMap:
+            name: opa-server-config
 

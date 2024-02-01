@@ -5,6 +5,7 @@
     }
   },
   "user_roles": {
-    "alice@test.com": "admin"
+    "alice@test.com": "admin",
+    "bob@test.com": "common"
   }
 }

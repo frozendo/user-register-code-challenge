@@ -1,0 +1,10 @@
+version: '3'
+services:
+  opa:
+    image: openpolicyagent/opa:edge-rootless
+    network_mode: "host"
+    volumes:
+      - ./opa-server-files/policies:/policies
+      - ./opa-server-files/data:/data
+      - ./opa-server-files/config.yml:/server/config.yml
+    command: ["run", "--server", "/policies", "/data", "-c", "/server/config.yml"]

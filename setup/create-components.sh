@@ -1,6 +1,7 @@
 #create configmaps
 kubectl create configmap opa-server-policies --from-file=opa-server-files/policies
 kubectl create configmap opa-server-data --from-file=opa-server-files/data
+kubectl create configmap opa-server-config --from-file=opa-server-files/config
 
 #create postgres service
 kubectl apply -f kubernetes/postgres-external-service.yaml

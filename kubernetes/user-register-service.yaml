@@ -6,6 +6,8 @@ metadata:
     resource: user-register-app
     app: user-register
 spec:
+  type: ClusterIP
+  clusterIP: 10.96.140.83
   selector:
     resource: user-register-app
     app: user-register

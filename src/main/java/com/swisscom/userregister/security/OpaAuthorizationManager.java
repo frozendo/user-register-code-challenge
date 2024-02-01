@@ -2,6 +2,7 @@ package com.swisscom.userregister.security;
 
 import com.swisscom.userregister.domain.enums.ApiActionEnum;
 import com.swisscom.userregister.service.OpaServerService;
+import com.swisscom.userregister.service.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +22,12 @@ public class OpaAuthorizationManager implements AuthorizationManager<RequestAuth
     private static final Logger logger = LoggerFactory.getLogger(OpaAuthorizationManager.class);
 
     private final OpaServerService opaServerService;
+    private final SessionService sessionService;
 
-    public OpaAuthorizationManager(OpaServerService opaServerService) {
+    public OpaAuthorizationManager(OpaServerService opaServerService,
+                                   SessionService sessionService) {
         this.opaServerService = opaServerService;
+        this.sessionService = sessionService;
     }
 
     @Override
@@ -42,15 +46,23 @@ public class OpaAuthorizationManager implements AuthorizationManager<RequestAuth
             return new AuthorizationDecision(false);
         }
 
-        var action = defineAction(request);
+        var optSession = sessionService.validateToken(headerToken);
 
-        logger.info("Check {} authorization to perform the {} action", headerToken, action);
-        var authorizationResult = opaServerService.authorizeUserAction(headerToken, action);
+        if (optSession.isPresent()) {
+            var action = defineAction(request);
 
-        var requestUri = request.getRequestURI();
-        logger.info("User {} is authorized = {} to perform the {} the uri {}",
-                headerToken, authorizationResult, action, requestUri);
-        return new AuthorizationDecision(authorizationResult);
+            var email = optSession.get().getEmail();
+
+            logger.info("Check {} authorization to perform the {} action", email, action);
+            var authorizationResult = opaServerService.authorizeUserAction(email, action);
+
+            var requestUri = request.getRequestURI();
+            logger.info("User {} is authorized = {} to perform the {} the uri {}",
+                    email, authorizationResult, action, requestUri);
+            return new AuthorizationDecision(authorizationResult);
+        }
+        logger.warn("Header token is invalid! Deny request");
+        return new AuthorizationDecision(false);
     }
 
     private ApiActionEnum defineAction(HttpServletRequest request) {

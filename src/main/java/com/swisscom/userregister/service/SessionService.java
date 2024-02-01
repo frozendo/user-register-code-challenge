@@ -5,6 +5,7 @@ import com.swisscom.userregister.repository.SessionRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,11 +25,10 @@ public class SessionService {
         return existToken;
     }
 
-    public boolean validateToken(String token) {
+    public Optional<Session> validateToken(String token) {
         return sessionRepository.findByToken(token)
-                .map(value ->
-                        value.getExpiration().isAfter(LocalDateTime.now()))
-                .orElse(false);
+                .filter(value ->
+                        value.getExpiration().isAfter(LocalDateTime.now()));
     }
 
     private String createAndSaveNewSession(String email) {

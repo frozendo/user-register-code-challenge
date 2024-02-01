@@ -93,9 +93,9 @@ class SessionServiceUnitTest {
 
         when(sessionRepository.findByToken(TOKEN)).thenReturn(Optional.of(session));
 
-        boolean isValid = sessionService.validateToken(TOKEN);
+        var optSession = sessionService.validateToken(TOKEN);
 
-        assertTrue(isValid);
+        assertTrue(optSession.isPresent());
 
         verify(sessionRepository, times(1)).findByToken(TOKEN);
         verifyNoMoreInteractions(sessionRepository);
@@ -109,9 +109,9 @@ class SessionServiceUnitTest {
 
         when(sessionRepository.findByToken(TOKEN)).thenReturn(Optional.of(session));
 
-        boolean isValid = sessionService.validateToken(TOKEN);
+        var optSession = sessionService.validateToken(TOKEN);
 
-        assertFalse(isValid);
+        assertFalse(optSession.isPresent());
 
         verify(sessionRepository, times(1)).findByToken(TOKEN);
         verifyNoMoreInteractions(sessionRepository);
@@ -121,9 +121,9 @@ class SessionServiceUnitTest {
     void testValidateTokenWhenTokenNotExist() {
         when(sessionRepository.findByToken(TOKEN)).thenReturn(Optional.empty());
 
-        boolean isValid = sessionService.validateToken(TOKEN);
+        var optSession = sessionService.validateToken(TOKEN);
 
-        assertFalse(isValid);
+        assertFalse(optSession.isPresent());
 
         verify(sessionRepository, times(1)).findByToken(TOKEN);
         verifyNoMoreInteractions(sessionRepository);

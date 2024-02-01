@@ -24,7 +24,7 @@ import java.io.IOException;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = UserRegisterApplication.class)
 public abstract class IntegrationTests {
 
-    private static final String AUTHORIZATION_DEFAULT_EMAIL = "gandalf@whitewizard.com";
+    private static final String AUTHORIZATION_DEFAULT_TOKEN = "428034dd06a4465ba1d4995338b90e85";
 
     @LocalServerPort
     private Integer port;
@@ -46,13 +46,13 @@ public abstract class IntegrationTests {
     }
 
     protected RequestSpecification getRequest() {
-        return getRequest(AUTHORIZATION_DEFAULT_EMAIL);
+        return getRequest(AUTHORIZATION_DEFAULT_TOKEN);
     }
 
-    protected RequestSpecification getRequest(String email) {
+    protected RequestSpecification getRequest(String token) {
         var spec = new RequestSpecBuilder()
                 .setContentType(ContentType.JSON)
-                .addHeader(HttpHeaders.AUTHORIZATION, email)
+                .addHeader(HttpHeaders.AUTHORIZATION, token)
                 .build();
         return RestAssured.given()
                 .when()

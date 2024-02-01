@@ -13,16 +13,18 @@ import static org.hamcrest.Matchers.hasSize;
 
 @Sql(value = {"/scripts/user.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(value = {"/scripts/clear.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-class UserAuthorizationIntegrationTests extends IntegrationTests {
+class AuthorizationIntegrationTests extends IntegrationTests {
 
-    private static final String ADMIN_USER_EMAIL = "gandalf@whitewizard.com";
-    private static final String COMMON_USER_EMAIL = "fangorn@email.com";
+    private static final String ADMIN_VALID_TOKEN = "428034dd06a4465ba1d4995338b90e85";
+    private static final String COMMON_VALID_TOKEN = "544034dd06a4465cb2e5005338b90e85";
+    private static final String NOT_EXIST_TOKEN = "428034dd06a4465ba1d4995338b12345";
+    private static final String EXPIRED_TOKEN = "539145ee06a4465ba1d4995338b12345";
     public static final String USER_EMAIL = "test@email.com";
     public static final String USER_NAME = "test";
 
     @Test
     void testListUsersWithAdminUser() {
-        getRequest(ADMIN_USER_EMAIL)
+        getRequest(ADMIN_VALID_TOKEN)
                 .get(UserController.PATH)
                 .then()
                 .log().all()
@@ -33,7 +35,7 @@ class UserAuthorizationIntegrationTests extends IntegrationTests {
 
     @Test
     void testListUsersWithCommonUser() {
-        getRequest(COMMON_USER_EMAIL)
+        getRequest(COMMON_VALID_TOKEN)
                 .get(UserController.PATH)
                 .then()
                 .log().all()
@@ -47,7 +49,7 @@ class UserAuthorizationIntegrationTests extends IntegrationTests {
 
         var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
 
-        getRequest(ADMIN_USER_EMAIL)
+        getRequest(ADMIN_VALID_TOKEN)
                 .body(getJson(createUserRequest))
                 .post(UserController.PATH)
                 .then()
@@ -63,7 +65,49 @@ class UserAuthorizationIntegrationTests extends IntegrationTests {
 
         var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
 
-        getRequest(COMMON_USER_EMAIL)
+        getRequest(COMMON_VALID_TOKEN)
+                .body(getJson(createUserRequest))
+                .post(UserController.PATH)
+                .then()
+                .log().all()
+                .assertThat()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @Test
+    void testCreateUserWithTokenThatNotExist() {
+
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
+
+        getRequest(NOT_EXIST_TOKEN)
+                .body(getJson(createUserRequest))
+                .post(UserController.PATH)
+                .then()
+                .log().all()
+                .assertThat()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @Test
+    void testCreateUserWithExpiredToken() {
+
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
+
+        getRequest(EXPIRED_TOKEN)
+                .body(getJson(createUserRequest))
+                .post(UserController.PATH)
+                .then()
+                .log().all()
+                .assertThat()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @Test
+    void testCreateUserWithEmptyToken() {
+
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
+
+        getRequest("")
                 .body(getJson(createUserRequest))
                 .post(UserController.PATH)
                 .then()

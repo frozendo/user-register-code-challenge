@@ -1,0 +1,10 @@
+{
+  "role_grants": {
+    "common": {
+      "action": "read"
+    }
+  },
+  "user_roles": {
+    "alice@test.com": "admin"
+  }
+}

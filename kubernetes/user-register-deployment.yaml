@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-register-deployment
+  labels:
+    resource: user-register-app
+    app: user-register
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      resource: user-register-app
+      app: user-register
+  template:
+    metadata:
+      labels:
+        resource: user-register-app
+        app: user-register
+    spec:
+      containers:
+        - name: user-register-api
+          image: frozendo90/user-register:latest
+          ports:
+            - containerPort: 9000
+

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-register-service
+  labels:
+    resource: user-register-app
+    app: user-register
+spec:
+  selector:
+    resource: user-register-app
+    app: user-register
+  ports:
+    - name: user-register-app
+      protocol: TCP
+      port: 9000
+      targetPort: 9000

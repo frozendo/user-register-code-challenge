@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opa-server-deployment
+  labels:
+    resource: opa-server
+    app: user-register
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      resource: opa-server
+      app: user-register
+  template:
+    metadata:
+      labels:
+        resource: opa-server
+        app: user-register
+    spec:
+      containers:
+        - name: opa-server-container
+          image: openpolicyagent/opa:edge-rootless
+          ports:
+            - containerPort: 8181
+          args:
+            - "run"
+            - "--ignore=.*"
+            - "--server"
+            - "/policies"
+            - "/data"
+          volumeMounts:
+            - readOnly: true
+              mountPath: /policies
+              name: opa-server-policies
+            - readOnly: true
+              mountPath: /data
+              name: opa-server-data
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8181
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8181
+            initialDelaySeconds: 10
+            periodSeconds: 15
+      volumes:
+        - name: opa-server-policies
+          configMap:
+            name: opa-server-policies
+        - name: opa-server-data
+          configMap:
+            name: opa-server-data
+

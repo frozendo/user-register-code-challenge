@@ -1,7 +1,8 @@
-insert into users(name, email, role) values ('Gandalf', 'gandalf@whitewizard.com', 'A');
-insert into users(name, email, role) values ('Frodo Baggins', 'frodo.baggins@theshire.com', 'A');
-insert into users(name, email, role) values ('Samwise Gamgee', 'samgamgee@theshire.com', 'C');
-insert into users(name, email, role) values ('Fangorn', 'fangorn@email.com', 'C');
+insert into users(name, email, password, role) values ('Gandalf', 'gandalf@whitewizard.com', '$2a$12$hmKqxOM4Ef7IlBHszwT7Xu0SVthCosHM9CzXFfnRu2SFngXoZRnxK', 'A');
+insert into users(name, email, password, role) values ('Frodo Baggins', 'frodo.baggins@theshire.com', '$2a$12$hmKqxOM4Ef7IlBHszwT7Xu0SVthCosHM9CzXFfnRu2SFngXoZRnxK', 'A');
+insert into users(name, email, password, role) values ('Samwise Gamgee', 'samgamgee@theshire.com', '$2a$12$hmKqxOM4Ef7IlBHszwT7Xu0SVthCosHM9CzXFfnRu2SFngXoZRnxK', 'C');
+insert into users(name, email, password, role) values ('Fangorn', 'fangorn@email.com', '$2a$12$hmKqxOM4Ef7IlBHszwT7Xu0SVthCosHM9CzXFfnRu2SFngXoZRnxK', 'C');
+insert into users(name, email, password, role) values ('Elrond', 'elrond@email.com', '$2a$12$hmKqxOM4Ef7IlBHszwT7Xu0SVthCosHM9CzXFfnRu2SFngXoZRnxK', 'A');
 
 insert into sessions(token, updated_at, expiration_at, email)
 values ('428034dd06a4465ba1d4995338b90e85', now(), now() + INTERVAL '1 day', 'gandalf@whitewizard.com');

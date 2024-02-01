@@ -62,8 +62,8 @@ class OpaServerServiceUnitTest {
 
     @Test
     void testSynchronizedUserToOpa() {
-        var userAlice = new User("Alice", "alice@email.com", RoleEnum.ADMIN);
-        var userBob = new User("Bob", "bob@email.com", RoleEnum.COMMON);
+        var userAlice = new User("Alice", "alice@email.com", "456789", RoleEnum.ADMIN);
+        var userBob = new User("Bob", "bob@email.com", "456789", RoleEnum.COMMON);
         var users = List.of(userAlice, userBob);
 
         Mono<String> mono = Mono.just("");

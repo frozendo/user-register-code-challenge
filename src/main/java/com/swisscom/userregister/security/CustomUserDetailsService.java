@@ -23,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             var entity = optionalUser.get();
             return User.builder()
                     .username(entity.getEmail())
-                    .password("$2y$10$jtkQeHIfHzRxV1HLmDz/j.1kaEWA/VZv4p5GJDqmQBd7vKlCO45bu")
+                    .password(entity.getPassword())
                     .roles(entity.getRoleName())
                     .build();
         }

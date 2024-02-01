@@ -15,12 +15,13 @@ import static org.hamcrest.Matchers.hasSize;
 @Sql(value = {"/scripts/clear.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class AuthorizationIntegrationTests extends IntegrationTests {
 
-    private static final String ADMIN_VALID_TOKEN = "428034dd06a4465ba1d4995338b90e85";
-    private static final String COMMON_VALID_TOKEN = "544034dd06a4465cb2e5005338b90e85";
-    private static final String NOT_EXIST_TOKEN = "428034dd06a4465ba1d4995338b12345";
-    private static final String EXPIRED_TOKEN = "539145ee06a4465ba1d4995338b12345";
+    private static final String ADMIN_VALID_TOKEN = "Bearer 428034dd06a4465ba1d4995338b90e85";
+    private static final String COMMON_VALID_TOKEN = "Bearer 544034dd06a4465cb2e5005338b90e85";
+    private static final String NOT_EXIST_TOKEN = "Bearer 428034dd06a4465ba1d4995338b12345";
+    private static final String EXPIRED_TOKEN = "Bearer 539145ee06a4465ba1d4995338b12345";
     public static final String USER_EMAIL = "test@email.com";
     public static final String USER_NAME = "test";
+    public static final String PASSWORD = "123456";
 
     @Test
     void testListUsersWithAdminUser() {
@@ -47,7 +48,7 @@ class AuthorizationIntegrationTests extends IntegrationTests {
     @Test
     void testCreateUserWithAdminUser() {
 
-        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, PASSWORD, RoleEnum.COMMON);
 
         getRequest(ADMIN_VALID_TOKEN)
                 .body(getJson(createUserRequest))
@@ -63,7 +64,7 @@ class AuthorizationIntegrationTests extends IntegrationTests {
     @Test
     void testCreateUserWithCommonUser() {
 
-        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, PASSWORD, RoleEnum.COMMON);
 
         getRequest(COMMON_VALID_TOKEN)
                 .body(getJson(createUserRequest))
@@ -77,7 +78,7 @@ class AuthorizationIntegrationTests extends IntegrationTests {
     @Test
     void testCreateUserWithTokenThatNotExist() {
 
-        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, PASSWORD, RoleEnum.COMMON);
 
         getRequest(NOT_EXIST_TOKEN)
                 .body(getJson(createUserRequest))
@@ -91,7 +92,7 @@ class AuthorizationIntegrationTests extends IntegrationTests {
     @Test
     void testCreateUserWithExpiredToken() {
 
-        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, PASSWORD, RoleEnum.COMMON);
 
         getRequest(EXPIRED_TOKEN)
                 .body(getJson(createUserRequest))
@@ -105,7 +106,7 @@ class AuthorizationIntegrationTests extends IntegrationTests {
     @Test
     void testCreateUserWithEmptyToken() {
 
-        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, PASSWORD, RoleEnum.COMMON);
 
         getRequest("")
                 .body(getJson(createUserRequest))

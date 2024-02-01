@@ -30,6 +30,7 @@ class UserControllerIntegrationTests extends IntegrationTests {
 
     public static final String DUPLICATE_EMAIL = "samgamgee@theshire.com";
     public static final String USER_EMAIL = "test@email.com";
+    public static final String PASSWORD = "123456";
     public static final String SYNCHRONIZE_EMAIL = "validateSynchroinizeToOpa@test.com";
     public static final String USER_NAME = "test";
 
@@ -53,12 +54,12 @@ class UserControllerIntegrationTests extends IntegrationTests {
                 .log().all()
                 .assertThat()
                 .statusCode(HttpStatus.OK.value())
-                .body("size", hasSize(4));
+                .body("size", hasSize(5));
     }
 
     @Test
     void testCreateUserWhenParameterDataIsNull() {
-        var createUserRequest = new CreateUserRequest(null, null, null);
+        var createUserRequest = new CreateUserRequest(null, null, null, null);
 
         getRequest()
                 .body(getJson(createUserRequest))
@@ -67,13 +68,13 @@ class UserControllerIntegrationTests extends IntegrationTests {
                 .log().all()
                 .assertThat()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("size", hasSize(2));
+                .body("size", hasSize(3));
 
     }
 
     @Test
     void testCreateUserWhenParameterDataIsEmpty() {
-        var createUserRequest = new CreateUserRequest("", "", null);
+        var createUserRequest = new CreateUserRequest("", "", "",  null);
 
         getRequest()
                 .body(getJson(createUserRequest))
@@ -82,12 +83,12 @@ class UserControllerIntegrationTests extends IntegrationTests {
                 .log().all()
                 .assertThat()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("size", hasSize(2));
+                .body("size", hasSize(3));
     }
 
     @Test
     void testCreateAdminUser() {
-        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.ADMIN);
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, PASSWORD, RoleEnum.ADMIN);
 
         getRequest()
                 .body(getJson(createUserRequest))
@@ -105,11 +106,12 @@ class UserControllerIntegrationTests extends IntegrationTests {
         var user = savedUser.get();
         assertNotNull(user.getRole());
         assertEquals(RoleEnum.ADMIN, user.getRole());
+        assertNotNull(user.getPassword());
     }
 
     @Test
     void testCreateCommonUser() {
-        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, RoleEnum.COMMON);
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, PASSWORD, RoleEnum.COMMON);
 
         getRequest()
                 .body(getJson(createUserRequest))
@@ -127,11 +129,12 @@ class UserControllerIntegrationTests extends IntegrationTests {
         var user = savedUser.get();
         assertNotNull(user.getRole());
         assertEquals(RoleEnum.COMMON, user.getRole());
+        assertNotNull(user.getPassword());
     }
 
     @Test
     void testCreateUserWhenRoleWasNotInformed() {
-        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, null);
+        var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, PASSWORD, null);
 
         getRequest()
                 .body(getJson(createUserRequest))
@@ -149,11 +152,12 @@ class UserControllerIntegrationTests extends IntegrationTests {
         var user = savedUser.get();
         assertNotNull(user.getRole());
         assertEquals(RoleEnum.COMMON, user.getRole());
+        assertNotNull(user.getPassword());
     }
 
     @Test
     void testCreateUserWhenEmailAlreadyExist() {
-        var createUserRequest = new CreateUserRequest(USER_NAME, DUPLICATE_EMAIL, RoleEnum.ADMIN);
+        var createUserRequest = new CreateUserRequest(USER_NAME, DUPLICATE_EMAIL, PASSWORD, RoleEnum.ADMIN);
         var expectedMessage = "Email %s already exist!".formatted(DUPLICATE_EMAIL);
 
         getRequest()
@@ -171,7 +175,7 @@ class UserControllerIntegrationTests extends IntegrationTests {
 
     @Test
     void testUserSynchronizedToOpaServer() throws JSONException {
-        var createUserRequest = new CreateUserRequest(USER_NAME, SYNCHRONIZE_EMAIL, RoleEnum.ADMIN);
+        var createUserRequest = new CreateUserRequest(USER_NAME, SYNCHRONIZE_EMAIL, PASSWORD, RoleEnum.ADMIN);
 
         getRequest()
                 .body(getJson(createUserRequest))
@@ -189,6 +193,7 @@ class UserControllerIntegrationTests extends IntegrationTests {
         var user = savedUser.get();
         assertNotNull(user.getRole());
         assertEquals(RoleEnum.ADMIN, user.getRole());
+        assertNotNull(user.getPassword());
 
         var userFromOpa = getSynchronizeEmailInOpaServer();
         assertTrue(userFromOpa.isPresent());
@@ -210,7 +215,7 @@ class UserControllerIntegrationTests extends IntegrationTests {
             var key = results.names().getString(i);
             if (SYNCHRONIZE_EMAIL.equals(key)) {
                 var value = results.getString(key);
-                return Optional.of(new User("", key, RoleEnum.getEnumValue(value)));
+                return Optional.of(new User("", key, "", RoleEnum.getEnumValue(value)));
             }
         }
 

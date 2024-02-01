@@ -9,11 +9,12 @@ import java.util.Objects;
 public record CreateUserRequest(
         @NotBlank(message = "User name is mandatory!") String name,
         @NotBlank(message = "User email is mandatory!") String email,
+        @NotBlank(message = "Password is mandatory") String password,
         RoleEnum role) {
 
     public User convertToEntity() {
         var userRole = Objects.requireNonNullElse(role, RoleEnum.COMMON);
-        return new User(name, email, userRole);
+        return new User(name, email, password, userRole);
     }
 
 }

@@ -6,6 +6,7 @@ import com.swisscom.userregister.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +18,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final OpaServerService opaServerService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, OpaServerService opaServerService) {
+    public UserService(UserRepository userRepository,
+                       OpaServerService opaServerService,
+                       BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.opaServerService = opaServerService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<User> listUsers() {
@@ -31,6 +36,7 @@ public class UserService {
     public User createAndSendToOpa(User user) {
         try {
             logger.info("Save user with email {} on database", user.getEmail());
+            user.encryptPassword(passwordEncoder);
             var savedUser = userRepository.save(user);
 
             logger.info("User saved, try to synchronize to OPA server");

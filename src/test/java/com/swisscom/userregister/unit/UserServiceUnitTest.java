@@ -9,6 +9,7 @@ import com.swisscom.userregister.service.UserService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
 
@@ -27,19 +28,21 @@ class UserServiceUnitTest {
 
     private final UserRepository userRepository;
     private final OpaServerService opaServerService;
+    private final BCryptPasswordEncoder passwordEncoder;
     private final UserService userService;
 
     public UserServiceUnitTest() {
         this.userRepository = mock(UserRepository.class);
         this.opaServerService = mock(OpaServerService.class);
-        this.userService = new UserService(userRepository, opaServerService);
+        this.passwordEncoder = mock(BCryptPasswordEncoder.class);
+        this.userService = new UserService(userRepository, opaServerService, passwordEncoder);
     }
 
     @Test
     void testCreateUser() {
-        var userEve = new User("Eve", "eve@email.com", RoleEnum.ADMIN);
-        var userAlice = new User("Alice", "alice@email.com", RoleEnum.ADMIN);
-        var userBob = new User("Bob", "bob@email.com", RoleEnum.COMMON);
+        var userEve = new User("Eve", "eve@email.com", "456789", RoleEnum.ADMIN);
+        var userAlice = new User("Alice", "alice@email.com", "456789", RoleEnum.ADMIN);
+        var userBob = new User("Bob", "bob@email.com", "456789", RoleEnum.COMMON);
 
         var users = List.of(userAlice, userBob, userEve);
 
@@ -54,7 +57,7 @@ class UserServiceUnitTest {
 
     @Test
     void testCreateUserWhenEmailExist() {
-        var user = new User("test", "duplicate@email.com", RoleEnum.ADMIN);
+        var user = new User("test", "duplicate@email.com", "456789", RoleEnum.ADMIN);
 
         var dataException = new DataIntegrityViolationException("uk_user_email");
 

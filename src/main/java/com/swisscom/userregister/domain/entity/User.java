@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Objects;
 
@@ -34,6 +35,11 @@ public class User {
     private String email;
 
     @NotNull
+    @Size(max = 500)
+    @Column(name = "password")
+    private String password;
+
+    @NotNull
     @Convert(converter = UserRoleConvert.class)
     @Column(name = "role")
     private RoleEnum role;
@@ -41,10 +47,15 @@ public class User {
     public User() {
     }
 
-    public User(String name, String email, RoleEnum role) {
+    public User(String name, String email, String password, RoleEnum role) {
         this.name = name;
         this.email = email;
+        this.password = password;
         this.role = role;
+    }
+
+    public void encryptPassword(BCryptPasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(this.password);
     }
 
     public String getName() {
@@ -53,6 +64,10 @@ public class User {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public RoleEnum getRole() {

@@ -24,7 +24,7 @@ import java.io.IOException;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = UserRegisterApplication.class)
 public abstract class IntegrationTests {
 
-    private static final String AUTHORIZATION_DEFAULT_TOKEN = "428034dd06a4465ba1d4995338b90e85";
+    private static final String AUTHORIZATION_DEFAULT_TOKEN = "Bearer 428034dd06a4465ba1d4995338b90e85";
 
     @LocalServerPort
     private Integer port;

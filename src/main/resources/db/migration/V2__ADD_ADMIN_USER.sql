@@ -1,1 +1,2 @@
-insert into users (name, email, role) values ('Alice', 'alice@test.com', 'A');
+insert into users (name, email, password, role) values ('Alice', 'alice@test.com', '$2a$12$hmKqxOM4Ef7IlBHszwT7Xu0SVthCosHM9CzXFfnRu2SFngXoZRnxK', 'A');
+insert into users (name, email, password, role) values ('Bob', 'bob@test.com', '$2a$12$hmKqxOM4Ef7IlBHszwT7Xu0SVthCosHM9CzXFfnRu2SFngXoZRnxK', 'C');

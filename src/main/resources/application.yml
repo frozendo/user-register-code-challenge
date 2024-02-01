@@ -1,6 +1,28 @@
+server:
+  port: 9000
+
+spring:
+  application: user-register
+  datasource:
+    url: jdbc:postgresql://172.17.0.1:5432/postgres
+    username: postgres
+    password: root
+    poolName: user-register-pool
+    maximum-pool-size: 8
+    minimum-idle: 0
+    idle-timeout: 30000
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  flyway:
+    enabled: false
+
 opa:
-  server: 'http://localhost:8181'
+  server: 'http://10.96.134.82:8181'
   policy-endpoint: '/v1/policies/register'
-  roles-endpoint: '/v1/data/role_grants'
-  users-endpoint: '/v1/data/user_roles'
+  data-endpoint: '/v1/data'
+  user-roles-endpoint: '/user_roles'
   authorize-endpoint: '/v1/data/users/register/allow'

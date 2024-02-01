@@ -1,0 +1,13 @@
+{
+  "role_grants": {
+    "common": {
+      "action": "read"
+    }
+  },
+  "user_roles": {
+    "fangorn@email.com": "common",
+    "frodo.baggins@theshire.com": "admin",
+    "gandalf@whitewizard.com": "admin",
+    "samgamgee@theshire.com": "common"
+  }
+}

@@ -22,6 +22,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.json:json:20231013")
+	implementation("org.flywaydb:flyway-core")
 
 	runtimeOnly("org.postgresql:postgresql")
 

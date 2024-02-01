@@ -63,7 +63,7 @@ With this, we have a new image on the registry that can be used in Kubernetes.
 
 First, the following commands using Kind to run the Kubernetes cluster locally.
 
-We can also run on Minikube. See [this section]().
+We can also run on Minikube. See [this section](https://github.com/frozendo/user-register-code-challenge?tab=readme-ov-file#using-minikube).
 
 1. Configure the environment. This shell script starts a Postgres database on Docker and creates a Kubernetes cluster with Kind.
 ```

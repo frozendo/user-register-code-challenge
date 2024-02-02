@@ -1,6 +1,6 @@
 package com.swisscom.userregister.security;
 
-import com.swisscom.userregister.service.SessionService;
+import com.swisscom.userregister.service.OpaServerService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,13 +21,13 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
     private static final AntPathRequestMatcher DEFAULT_LOGIN_REQUEST_MATCHER = new AntPathRequestMatcher("/login");
 
     private final BasicAuthenticationConverter authenticationConverter;
-    private final SessionService sessionService;
+    private final OpaServerService opaServerService;
 
     public CustomAuthenticationFilter(AuthenticationManager authenticationManager,
-                                      SessionService sessionService) {
+                                      OpaServerService opaServerService) {
         super(DEFAULT_LOGIN_REQUEST_MATCHER, authenticationManager);
+        this.opaServerService = opaServerService;
         this.authenticationConverter = new BasicAuthenticationConverter();
-        this.sessionService = sessionService;
         setFilterProcessesUrl("/login");
     }
 
@@ -43,10 +43,20 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
                                          FilterChain chain,
                                          Authentication authentication) {
         final var principal = (User) authentication.getPrincipal();
-        var token = sessionService.generateAndRegisterToken(principal.getUsername());
+        var token = generateAndRegisterToken(principal.getUsername());
         var bearer = "Bearer ".concat(token);
         response.addHeader("access-control-expose-headers", HttpHeaders.AUTHORIZATION);
         response.addHeader(HttpHeaders.AUTHORIZATION, bearer);
+    }
+
+    public String generateAndRegisterToken(String email) {
+        var token = generateOpaqueToken();
+        opaServerService.synchronizeTokenToOpa(token, email);
+        return token;
+    }
+
+    private String generateOpaqueToken() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
 }

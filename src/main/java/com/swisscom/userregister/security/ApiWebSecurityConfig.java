@@ -1,6 +1,6 @@
 package com.swisscom.userregister.security;
 
-import com.swisscom.userregister.service.SessionService;
+import com.swisscom.userregister.service.OpaServerService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -22,16 +22,16 @@ public class ApiWebSecurityConfig {
     private final AuthorizationManager<RequestAuthorizationContext> opaAuthenticateManager;
     private final UserDetailsService userDetailsService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final SessionService sessionService;
+    private final OpaServerService opaServerService;
 
     public ApiWebSecurityConfig(AuthorizationManager<RequestAuthorizationContext> opaAuthenticateManager,
                                 UserDetailsService userDetailsService,
                                 AuthenticationManagerBuilder authenticationManagerBuilder,
-                                SessionService sessionService) {
+                                OpaServerService opaServerService) {
         this.opaAuthenticateManager = opaAuthenticateManager;
         this.userDetailsService = userDetailsService;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
-        this.sessionService = sessionService;
+        this.opaServerService = opaServerService;
     }
 
     @Bean
@@ -69,7 +69,7 @@ public class ApiWebSecurityConfig {
 
     private CustomAuthenticationFilter createAuthenticationFilter() {
         return new CustomAuthenticationFilter(
-                authenticationManagerBuilder.getOrBuild(), sessionService);
+                authenticationManagerBuilder.getOrBuild(), opaServerService);
     }
 
 }

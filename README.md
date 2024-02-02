@@ -74,6 +74,8 @@ sh ./setup/environment.sh
 sh ./setup/create-components.sh
 ```
 
+> Before executing the next step, wait for the startup of the pods. Check with `kubectl get pods`
+
 3. To execute requests to our API in Kubernetes, we need to enable Ingress on Kind. First, run the script below
 ```
 sh ./setup/enable_ingress.sh
@@ -92,11 +94,11 @@ vi /etc/hosts
 <your_IP> app.user-register
 ```
 
-With this, the application is running and able to receive requests.
+With this, the application is running and able to receive requests from our local machine.
 
 #### Using minikube
 
-"We don't need to run the `./setup/environment.sh` script when using Minikube. So, before executing the cluster, start a Postgres container:"
+We don't need to run the `./setup/environment.sh` script when using Minikube. So, before executing the cluster, start a Postgres container:
 ```
 docker run --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=root -e POSTGRES_USER=postgres --rm -d postgres:14-alpine
 ```
@@ -105,16 +107,64 @@ Now, we can initiate Minikube and configure Ingress to work using this [document
 
 With minikube running and Ingress enabled, execute the script `sh ./setup/create-components.sh` to configure all the necessary components.
 
+## Business Rules
+
+Some rules that the API checks:
+
+- Users must be authenticated in the application before making requests. To achieve this, send a POST request to the `/login` endpoint with a valid email and password. A token will be returned in the response header, on the Authorization property.
+- For requests to other endpoints, include the token returned from `/login` in the Authorization property of the request header, using the format `Bearer {token}`.
+- When creating a new user, provide the name, email, and password in the request payload. While an attribute for the user role is available, it is optional.
+- If the user's role is not specified in the payload, the application will create the user with the `COMMON` role.
+- Creating a user with an existing email in the database is not allowed. In such cases, the application returns an error.
+- Users roles and authentication tokens are synchronized to the OPA server.
+- The logs of every action on OPA server are sending for the API in the `/authorization/logs` endpoint, and authorization logs results stored in `authorization_logs` table.
+
 ## Using application
 
-"The application creates the user `alice@test.com` upon startup, allowing us to make requests with this user.
+The application creates two users upon startup:  
+- **alice@test.com:** ADMIN
+- **bob@test.com:** COMMON
+
+Both users have the same password: `456789`.
+We can use them to test our API.
+
+#### Actions with admin user
+
+Login 
+```
+curl --request POST --url http://app.user-register/login --header 'Authorization: Basic YWxpY2VAdGVzdC5jb206NDU2Nzg5'
+```
 
 List all users:
 ```
-curl -H 'Authorization: alice@test.com' 'http://app.user-register/api/users'
+curl --request GET --url http://app.user-register/api/users --header 'Authorization: Bearer {token}'
 ```
 
 Create a new user:
 ```
-curl -X POST -H 'Authorization: alice@test.com' -H 'content-type: application/json' 'http://app.user-register/api/users' --data '{"email": "bob@test.com", "name": "Bob", "role": "COMMON"}'
+curl --request POST --url http://app.user-register/api/users --header 'Authorization: Bearer {token}' --header 'Content-Type: application/json' --data '{"email": "flavio@test.com","name": "Flavio","password": "456789","role": "ADMIN"}'
 ```
+
+#### Actions with common user
+
+Login
+```
+curl --request POST --url http://app.user-register/login --header 'Authorization: Basic Ym9iQHRlc3QuY29tOjQ1Njc4OQ=='
+```
+
+List all users:
+```
+curl --request GET --url http://app.user-register/api/users --header 'Authorization: Bearer {token}'
+```
+
+Create a new user (must not work and return an 403 status):
+```
+curl --request POST --url http://app.user-register/api/users --header 'Authorization: Bearer {token}' --header 'Content-Type: application/json' --data '{"email": "flavio@test.com","name": "Flavio","password": "456789","role": "ADMIN"}'
+```
+
+## Possible Improvements
+
+- Add secrets and configmap to Kubernetes for store applications config values.
+- Implement token expiration for tokens stored in the OPA server based on predefined rules (for example time expiration).
+- Register OPA server logs in async way.
+- Utilize Terraform for environment setup.

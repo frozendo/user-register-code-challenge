@@ -11,11 +11,7 @@
     "samgamgee@theshire.com": "common"
   },
   "user_token": {
-    "428034dd06a4465ba1d4995338b90e85": {
-      "email": "gandalf@whitewizard.com"
-    },
-    "544034dd06a4465cb2e5005338b90e85": {
-      "email": "fangorn@email.com"
-    }
+    "428034dd06a4465ba1d4995338b90e85": "gandalf@whitewizard.com",
+    "544034dd06a4465cb2e5005338b90e85": "fangorn@email.com"
   }
 }

@@ -27,25 +27,28 @@ public class OpaServerService {
         this.opaServerProperties = opaServerProperties;
     }
 
-    public void synchronizeUsersToOpa(List<User> users) {
-        var usersJson = getSynchronizeUsersRequestJson(users);
+    public void synchronizeUsersToOpa(User user) {
+        var usersJson = getSynchronizeUsersRequestJson(user);
         logger.info("Synchronize users to OPA server");
         var uri = opaServerProperties.getUserRolesUri();
-        executePutRequest(usersJson, uri);
+        executePatchRequest(usersJson, uri);
     }
 
-    private String getSynchronizeUsersRequestJson(List<User> users) {
-        var userObject = new JSONObject();
+    private String getSynchronizeUsersRequestJson(User user) {
+        var jsonObject = new JSONObject();
+        jsonObject.put("op", "add");
+        jsonObject.put("path", user.getEmail());
 
-        for (User user : users) {
-            userObject.put(user.getEmail(), user.getRoleName());
-        }
+        jsonObject.put("value", user.getRoleName());
 
-        return userObject.toString();
+        var array = new JSONArray();
+        array.put(jsonObject);
+
+        return array.toString();
     }
 
-    private void executePutRequest(String usersJson, String uri) {
-        client.put()
+    private void executePatchRequest(String usersJson, String uri) {
+        client.patch()
                 .uri(uri)
                 .accept(MediaType.ALL)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -103,26 +106,12 @@ public class OpaServerService {
         jsonObject.put("op", "add");
         jsonObject.put("path", token);
 
-        var valueObject = new JSONObject();
-        valueObject.put("email", email);
-
-        jsonObject.put("value", valueObject);
+        jsonObject.put("value", email);
 
         var array = new JSONArray();
         array.put(jsonObject);
 
         return array.toString();
-    }
-
-    private void executePatchRequest(String usersJson, String uri) {
-        client.patch()
-            .uri(uri)
-            .accept(MediaType.ALL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(usersJson)
-            .retrieve()
-            .bodyToMono(String.class)
-            .block();
     }
 
 }

@@ -23,5 +23,5 @@ user_is_granted contains grant if {
 }
 
 get_email_by_user_token contains email if {
-	email := data.user_token[input.token].email
+	email := data.user_token[input.token]
 }

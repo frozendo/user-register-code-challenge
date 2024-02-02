@@ -87,7 +87,7 @@ class AuthenticationIntegrationTests extends IntegrationTests {
 
         for (int i = 0; i < results.names().length(); i++) {
             var key = results.names().getString(i);
-            var toCheckEmail = results.getJSONObject(key).getString("email");
+            var toCheckEmail = results.getString(key);
             if (email.equals(toCheckEmail)) {
                 return key;
             }

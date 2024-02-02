@@ -40,7 +40,7 @@ public class UserService {
             var savedUser = userRepository.save(user);
 
             logger.info("User saved, try to synchronize to OPA server");
-            synchronizeUsersToOpa();
+            synchronizeUsersToOpa(savedUser);
 
             logger.info("User {} synchronized to OPA server!", user.getEmail());
             return savedUser;
@@ -50,9 +50,8 @@ public class UserService {
         }
     }
 
-    private void synchronizeUsersToOpa() {
-        var users = listUsers();
-        opaServerService.synchronizeUsersToOpa(users);
+    private void synchronizeUsersToOpa(User user) {
+        opaServerService.synchronizeUsersToOpa(user);
     }
 
     private void dataIntegrityException(User user, DataIntegrityViolationException ex) {

@@ -16,6 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -41,18 +42,13 @@ class UserServiceUnitTest {
     @Test
     void testCreateUser() {
         var userEve = new User("Eve", "eve@email.com", "456789", RoleEnum.ADMIN);
-        var userAlice = new User("Alice", "alice@email.com", "456789", RoleEnum.ADMIN);
-        var userBob = new User("Bob", "bob@email.com", "456789", RoleEnum.COMMON);
 
-        var users = List.of(userAlice, userBob, userEve);
-
-        when(userRepository.findAll()).thenReturn(users);
+        when(userRepository.save(any(User.class))).thenReturn(userEve);
 
         userService.createAndSendToOpa(userEve);
 
         verify(userRepository, times(1)).save(userEve);
-        verify(opaServerService, times(1)).synchronizeUsersToOpa(users);
-        verify(userRepository, times(1)).findAll();
+        verify(opaServerService, times(1)).synchronizeUsersToOpa(any(User.class));
     }
 
     @Test

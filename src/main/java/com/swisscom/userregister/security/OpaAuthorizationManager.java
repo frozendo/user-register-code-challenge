@@ -1,9 +1,7 @@
 package com.swisscom.userregister.security;
 
-import com.swisscom.userregister.domain.entity.Session;
 import com.swisscom.userregister.domain.enums.ApiActionEnum;
 import com.swisscom.userregister.service.OpaServerService;
-import com.swisscom.userregister.service.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 @Component
@@ -24,12 +21,9 @@ public class OpaAuthorizationManager implements AuthorizationManager<RequestAuth
     private static final Logger logger = LoggerFactory.getLogger(OpaAuthorizationManager.class);
 
     private final OpaServerService opaServerService;
-    private final SessionService sessionService;
 
-    public OpaAuthorizationManager(OpaServerService opaServerService,
-                                   SessionService sessionService) {
+    public OpaAuthorizationManager(OpaServerService opaServerService) {
         this.opaServerService = opaServerService;
-        this.sessionService = sessionService;
     }
 
     @Override
@@ -48,13 +42,7 @@ public class OpaAuthorizationManager implements AuthorizationManager<RequestAuth
             return new AuthorizationDecision(false);
         }
 
-        var optSession = sessionService.validateToken(token);
-
-        if (optSession.isPresent()) {
-            return validateUserRoles(request, optSession);
-        }
-        logger.warn("Header token is invalid! Deny request");
-        return new AuthorizationDecision(false);
+        return validateUserRoles(request, token);
     }
 
     private String extractBearerToken(HttpServletRequest request) {
@@ -73,17 +61,13 @@ public class OpaAuthorizationManager implements AuthorizationManager<RequestAuth
         return ApiActionEnum.WRITE;
     }
 
-    private AuthorizationDecision validateUserRoles(HttpServletRequest request, Optional<Session> optSession) {
+    private AuthorizationDecision validateUserRoles(HttpServletRequest request, String token) {
         var action = defineAction(request);
 
-        var email = optSession.get().getEmail();
+        logger.info("Check token {} has authorization to perform the {} action", token, action);
+        var authorizationResult = opaServerService.authorizeUserAction(token, action);
 
-        logger.info("Check {} authorization to perform the {} action", email, action);
-        var authorizationResult = opaServerService.authorizeUserAction(email, action);
-
-        var requestUri = request.getRequestURI();
-        logger.info("User {} is authorized = {} to perform the {} the uri {}",
-                email, authorizationResult, action, requestUri);
+        logger.info("Token {} is authorized", token);
         return new AuthorizationDecision(authorizationResult);
     }
 }

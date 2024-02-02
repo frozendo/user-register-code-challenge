@@ -25,6 +25,7 @@ opa:
   policy-endpoint: '/v1/policies/register'
   data-endpoint: '/v1/data'
   user-roles-endpoint: '/user_roles'
+  token-endpoint: '/user_token'
   authorize-endpoint: '/v1/data/users/register/allow'
 
 management:

@@ -12,9 +12,11 @@ import java.util.UUID;
 public class SessionService {
 
     private final SessionRepository sessionRepository;
+    private final OpaServerService opaServerService;
 
-    public SessionService(SessionRepository sessionRepository) {
+    public SessionService(SessionRepository sessionRepository, OpaServerService opaServerService) {
         this.sessionRepository = sessionRepository;
+        this.opaServerService = opaServerService;
     }
 
     public String generateAndRegisterToken(String email) {
@@ -25,19 +27,6 @@ public class SessionService {
         return existToken;
     }
 
-    public Optional<Session> validateToken(String token) {
-        return sessionRepository.findByToken(token)
-                .filter(value ->
-                        value.getExpiration().isAfter(LocalDateTime.now()));
-    }
-
-    private String createAndSaveNewSession(String email) {
-        var token = generateOpaqueToken();
-        var session = createSession(token, email);
-        sessionRepository.save(session);
-        return token;
-    }
-
     private String validateExistSession(String email) {
         return sessionRepository.findByEmail(email)
                 .filter(value -> value.getExpiration().isAfter(LocalDateTime.now()))
@@ -45,7 +34,15 @@ public class SessionService {
                 .orElse("");
     }
 
-    private static String generateOpaqueToken() {
+    private String createAndSaveNewSession(String email) {
+        var token = generateOpaqueToken();
+        var session = createSession(token, email);
+        sessionRepository.save(session);
+        opaServerService.synchronizeTokenToOpa(token, email);
+        return token;
+    }
+
+    private String generateOpaqueToken() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 

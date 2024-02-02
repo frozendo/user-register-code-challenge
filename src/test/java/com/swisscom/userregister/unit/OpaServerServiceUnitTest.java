@@ -43,6 +43,7 @@ class OpaServerServiceUnitTest {
                 "/v1/policies/register",
                 "/v1/data",
                 "/user_roles",
+                "user_token",
                 "/v1/data/users/register/allow");
     }
 
@@ -53,6 +54,7 @@ class OpaServerServiceUnitTest {
 
         when(webClient.put()).thenReturn(requestBodyUriSpec);
         when(webClient.post()).thenReturn(requestBodyUriSpec);
+        when(webClient.patch()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
         when(requestBodySpec.accept(any(MediaType.class))).thenReturn(requestBodySpec);
         when(requestBodySpec.contentType(any(MediaType.class))).thenReturn(requestBodySpec);
@@ -118,6 +120,20 @@ class OpaServerServiceUnitTest {
 
         verify(webClient, times(1)).post();
 
+    }
+
+    @Test
+    void testSynchronizeTokenToOpa() {
+        var token = "ABC123";
+        var email = "alice@email.com";
+
+        Mono<String> mono = Mono.just("");
+
+        when(responseSpec.bodyToMono(String.class)).thenReturn(mono);
+
+        opaServerService.synchronizeTokenToOpa(token, email);
+
+        verify(webClient, times(1)).patch();
     }
 
 }

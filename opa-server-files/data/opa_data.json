@@ -7,5 +7,6 @@
   "user_roles": {
     "alice@test.com": "admin",
     "bob@test.com": "common"
-  }
+  },
+  "user_token": {}
 }

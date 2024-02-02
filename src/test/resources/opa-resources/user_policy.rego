@@ -11,9 +11,17 @@ allow if {
 	input.action == grant.action
 }
 
-user_is_admin if data.user_roles[input.email] == "admin"
+user_is_admin if {
+	some email in get_email_by_user_token
+	data.user_roles[email] == "admin"
+}
 
 user_is_granted contains grant if {
-	role := data.user_roles[input.email]
+	some email in get_email_by_user_token
+	role := data.user_roles[email]
 	grant := data.role_grants[role]
+}
+
+get_email_by_user_token contains email if {
+	email := data.user_token[input.token].email
 }

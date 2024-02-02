@@ -30,7 +30,7 @@ class AuthorizationLogServiceUnitTest {
     void testSaveValidAuthorizationLog() {
         var inputObject = new JSONObject();
         inputObject.put("action", "read");
-        inputObject.put("email", "test@email.com");
+        inputObject.put("token", "abcde12345");
 
         var jsonObject = new JSONObject();
         jsonObject.put("decision_id", "123456789");

@@ -35,7 +35,8 @@ public class UserController {
 
     @GetMapping
     public List<UserResponse> listUsers() {
-        return userService.listUsers().stream()
+        return userService.listUsers()
+                .stream()
                 .map(UserResponse::new)
                 .toList();
     }

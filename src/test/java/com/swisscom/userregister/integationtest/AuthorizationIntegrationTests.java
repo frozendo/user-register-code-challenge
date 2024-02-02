@@ -15,7 +15,6 @@ import static org.hamcrest.Matchers.hasSize;
 @Sql(value = {"/scripts/clear.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class AuthorizationIntegrationTests extends IntegrationTests {
 
-    private static final String ADMIN_VALID_TOKEN = "Bearer 428034dd06a4465ba1d4995338b90e85";
     private static final String COMMON_VALID_TOKEN = "Bearer 544034dd06a4465cb2e5005338b90e85";
     private static final String NOT_EXIST_TOKEN = "Bearer 428034dd06a4465ba1d4995338b12345";
     private static final String EXPIRED_TOKEN = "Bearer 539145ee06a4465ba1d4995338b12345";
@@ -25,7 +24,7 @@ class AuthorizationIntegrationTests extends IntegrationTests {
 
     @Test
     void testListUsersWithAdminUser() {
-        getRequest(ADMIN_VALID_TOKEN)
+        getRequest()
                 .get(UserController.PATH)
                 .then()
                 .log().all()
@@ -50,7 +49,7 @@ class AuthorizationIntegrationTests extends IntegrationTests {
 
         var createUserRequest = new CreateUserRequest(USER_NAME, USER_EMAIL, PASSWORD, RoleEnum.COMMON);
 
-        getRequest(ADMIN_VALID_TOKEN)
+        getRequest()
                 .body(getJson(createUserRequest))
                 .post(UserController.PATH)
                 .then()

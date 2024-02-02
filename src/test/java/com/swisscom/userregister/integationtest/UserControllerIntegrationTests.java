@@ -29,10 +29,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class UserControllerIntegrationTests extends IntegrationTests {
 
     public static final String DUPLICATE_EMAIL = "samgamgee@theshire.com";
-    public static final String USER_EMAIL = "test@email.com";
-    public static final String PASSWORD = "123456";
     public static final String SYNCHRONIZE_EMAIL = "validateSynchroinizeToOpa@test.com";
+    public static final String USER_EMAIL = "test@email.com";
     public static final String USER_NAME = "test";
+    public static final String PASSWORD = "123456";
 
     @Autowired
     private UserRepository userRepository;

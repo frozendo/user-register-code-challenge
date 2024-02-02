@@ -23,6 +23,7 @@ public class AuthorizationLogService {
         try {
             var authorizationLog = AuthorizationResultEnumConverter.convertLogAuthorizationRequest(requestBody);
             if (authorizationLog.getPath().equals(TARGET_PATH)) {
+                logger.info("Saving log for authorization action");
                 repository.save(authorizationLog);
             }
         } catch (Exception ex) {

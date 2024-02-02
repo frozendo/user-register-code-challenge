@@ -11,12 +11,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.json.JSONObject;
 
-import java.util.List;
-
 @Service
 public class OpaServerService {
 
     private static final Logger logger = LoggerFactory.getLogger(OpaServerService.class);
+
+    private static final String PATCH_JSON_OPERATION_KEY = "op";
+    private static final String PATCH_JSON_PATH_KEY = "path";
+    private static final String PATCH_JSON_VALUE_KEY = "value";
+    private static final String PATCH_JSON_ACTION = "add";
 
     private final WebClient client;
     private final OpaServerProperties opaServerProperties;
@@ -29,17 +32,17 @@ public class OpaServerService {
 
     public void synchronizeUsersToOpa(User user) {
         var usersJson = getSynchronizeUsersRequestJson(user);
-        logger.info("Synchronize users to OPA server");
+        logger.info("Synchronize new user to OPA server");
         var uri = opaServerProperties.getUserRolesUri();
         executePatchRequest(usersJson, uri);
     }
 
     private String getSynchronizeUsersRequestJson(User user) {
         var jsonObject = new JSONObject();
-        jsonObject.put("op", "add");
-        jsonObject.put("path", user.getEmail());
+        jsonObject.put(PATCH_JSON_OPERATION_KEY, PATCH_JSON_ACTION);
+        jsonObject.put(PATCH_JSON_PATH_KEY, user.getEmail());
 
-        jsonObject.put("value", user.getRoleName());
+        jsonObject.put(PATCH_JSON_VALUE_KEY, user.getRoleName());
 
         var array = new JSONArray();
         array.put(jsonObject);
@@ -60,8 +63,10 @@ public class OpaServerService {
 
     public boolean authorizeUserAction(String token, ApiActionEnum action) {
         var authorizeJson = getAuthorizeRequestJson(token, action);
-        logger.info("Send request to OPA server to authorize user {}", token);
+        logger.info("Authorize user {} with OPA server", token);
         var response = executePostRequest(authorizeJson, opaServerProperties.getAuthorizeUri());
+
+        logger.info("Server response with result: {}", response);
         return getAuthorizeResponse(response);
     }
 
@@ -103,10 +108,10 @@ public class OpaServerService {
 
     private String getSynchronizeTokenRequestJson(String token, String email) {
         var jsonObject = new JSONObject();
-        jsonObject.put("op", "add");
-        jsonObject.put("path", token);
+        jsonObject.put(PATCH_JSON_OPERATION_KEY, PATCH_JSON_ACTION);
+        jsonObject.put(PATCH_JSON_PATH_KEY, token);
 
-        jsonObject.put("value", email);
+        jsonObject.put(PATCH_JSON_VALUE_KEY, email);
 
         var array = new JSONArray();
         array.put(jsonObject);

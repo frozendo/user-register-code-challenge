@@ -13,6 +13,9 @@ import java.util.List;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String METHOD_ARGUMENT_ERROR_CODE = "001";
+    private static final String BUSINESS_ERROR_CODE = "002";
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
@@ -20,7 +23,7 @@ public class GlobalExceptionHandler {
         return ex.getBindingResult()
                 .getAllErrors()
                 .stream()
-                .map(i -> new ExceptionObject(i.getDefaultMessage()))
+                .map(i -> new ExceptionObject(METHOD_ARGUMENT_ERROR_CODE, i.getDefaultMessage()))
                 .toList();
     }
 
@@ -28,7 +31,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ResponseBody
     public ExceptionObject handleBusinessException(BusinessException ex) {
-        return new ExceptionObject(ex.getMessage());
+        return new ExceptionObject(BUSINESS_ERROR_CODE, ex.getMessage());
     }
 
 

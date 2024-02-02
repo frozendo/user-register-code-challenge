@@ -10,8 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,6 +20,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class OpaServerServiceUnitTest {
+
+    private static final String ALICE_EMAIL = "alice@email.com";
 
     private final WebClient webClient;
     private final OpaServerService opaServerService;
@@ -63,10 +63,8 @@ class OpaServerServiceUnitTest {
     }
 
     @Test
-    void testSynchronizedUserToOpa() {
-        var userAlice = new User("Alice", "alice@email.com", "456789", RoleEnum.ADMIN);
-        var userBob = new User("Bob", "bob@email.com", "456789", RoleEnum.COMMON);
-        var users = List.of(userAlice, userBob);
+    void testSynchronizeUserToOpa() {
+        var userAlice = new User("Alice", ALICE_EMAIL, "456789", RoleEnum.ADMIN);
 
         Mono<String> mono = Mono.just("");
 
@@ -84,7 +82,7 @@ class OpaServerServiceUnitTest {
 
         when(responseSpec.bodyToMono(String.class)).thenReturn(mono);
 
-        var result = opaServerService.authorizeUserAction("alice@email.com", ApiActionEnum.READ);
+        var result = opaServerService.authorizeUserAction(ALICE_EMAIL, ApiActionEnum.READ);
 
         assertTrue(result);
 
@@ -99,7 +97,7 @@ class OpaServerServiceUnitTest {
 
         when(responseSpec.bodyToMono(String.class)).thenReturn(mono);
 
-        var result = opaServerService.authorizeUserAction("alice@email.com", ApiActionEnum.READ);
+        var result = opaServerService.authorizeUserAction(ALICE_EMAIL, ApiActionEnum.READ);
 
         assertFalse(result);
 
@@ -114,7 +112,7 @@ class OpaServerServiceUnitTest {
 
         when(responseSpec.bodyToMono(String.class)).thenReturn(mono);
 
-        var result = opaServerService.authorizeUserAction("alice@email.com", ApiActionEnum.READ);
+        var result = opaServerService.authorizeUserAction(ALICE_EMAIL, ApiActionEnum.READ);
 
         assertFalse(result);
 
@@ -125,13 +123,12 @@ class OpaServerServiceUnitTest {
     @Test
     void testSynchronizeTokenToOpa() {
         var token = "ABC123";
-        var email = "alice@email.com";
 
         Mono<String> mono = Mono.just("");
 
         when(responseSpec.bodyToMono(String.class)).thenReturn(mono);
 
-        opaServerService.synchronizeTokenToOpa(token, email);
+        opaServerService.synchronizeTokenToOpa(token, ALICE_EMAIL);
 
         verify(webClient, times(1)).patch();
     }

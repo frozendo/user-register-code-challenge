@@ -4,6 +4,8 @@ import com.swisscom.userregister.service.OpaServerService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,7 +20,10 @@ import java.util.UUID;
 
 public class CustomAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private static final AntPathRequestMatcher DEFAULT_LOGIN_REQUEST_MATCHER = new AntPathRequestMatcher("/login");
+    private static final Logger log = LoggerFactory.getLogger(CustomAuthenticationFilter.class);
+
+    private static final String LOGIN_URI = "/login";
+    private static final AntPathRequestMatcher DEFAULT_LOGIN_REQUEST_MATCHER = new AntPathRequestMatcher(LOGIN_URI);
 
     private final BasicAuthenticationConverter authenticationConverter;
     private final OpaServerService opaServerService;
@@ -28,7 +33,7 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         super(DEFAULT_LOGIN_REQUEST_MATCHER, authenticationManager);
         this.opaServerService = opaServerService;
         this.authenticationConverter = new BasicAuthenticationConverter();
-        setFilterProcessesUrl("/login");
+        setFilterProcessesUrl(LOGIN_URI);
     }
 
     @Override
@@ -50,13 +55,16 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
     }
 
     public String generateAndRegisterToken(String email) {
+        log.info("Generate a token for {} and send token to OPA server!", email);
         var token = generateOpaqueToken();
         opaServerService.synchronizeTokenToOpa(token, email);
         return token;
     }
 
     private String generateOpaqueToken() {
-        return UUID.randomUUID().toString().replace("-", "");
+        return UUID.randomUUID()
+                .toString()
+                .replace("-", "");
     }
 
 }

@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,6 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @Sql(value = {"/scripts/clear.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class AuthenticationIntegrationTests extends IntegrationTests {
 
+    private static final String EMAIL = "elrond@email.com";
+    private static final String PASSWORD = "456789";
+    private static final String LOGIN_URI = "/login";
+
     @Autowired
     private OpaServerProperties opaServerProperties;
 
@@ -29,48 +34,47 @@ class AuthenticationIntegrationTests extends IntegrationTests {
 
     @Test
     void testAuthenticateUser() {
-        String email = "elrond@email.com";
-        getRequest(email, "456789")
-                .get("/login")
+        getRequest(EMAIL, PASSWORD)
+                .get(LOGIN_URI)
                 .then()
                 .log().all()
                 .assertThat()
                 .statusCode(HttpStatus.OK.value())
-                .header("Authorization", not(empty()));
+                .header(HttpHeaders.AUTHORIZATION, not(empty()));
 
-        var generateToken = getSynchronizeTokenInOpaServer(email);
+        var generateToken = getSynchronizeTokenInOpaServer(EMAIL);
         assertNotNull(generateToken);
         assertNotEquals("", generateToken);
     }
 
     @Test
     void testAuthenticateWithInvalidUser() {
-        String email = "elrond@test.com";
-        getRequest(email, "456789")
-                .get("/login")
+        String wrongEmail = "elrond@test.com";
+        getRequest(wrongEmail, PASSWORD)
+                .get(LOGIN_URI)
                 .then()
                 .log().all()
                 .assertThat()
                 .statusCode(HttpStatus.UNAUTHORIZED.value())
-                .header("Authorization", blankOrNullString());
+                .header(HttpHeaders.AUTHORIZATION, blankOrNullString());
 
 
-        var generateToken = getSynchronizeTokenInOpaServer(email);
+        var generateToken = getSynchronizeTokenInOpaServer(wrongEmail);
         assertEquals("", generateToken);
     }
 
     @Test
     void testAuthenticateWithInvalidPassword() {
-        String email = "elrond@email.com";
-        getRequest(email, "654987")
-                .get("/login")
+        String wrongPassword = "654987";
+        getRequest(EMAIL, wrongPassword)
+                .get(LOGIN_URI)
                 .then()
                 .log().all()
                 .assertThat()
                 .statusCode(HttpStatus.UNAUTHORIZED.value())
-                .header("Authorization", not(empty()));
+                .header(HttpHeaders.AUTHORIZATION, not(empty()));
 
-        var generateToken = getSynchronizeTokenInOpaServer(email);
+        var generateToken = getSynchronizeTokenInOpaServer(EMAIL);
         assertEquals("", generateToken);
     }
 

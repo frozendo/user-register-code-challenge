@@ -6,17 +6,24 @@ import org.json.JSONObject;
 
 public class AuthorizationResultEnumConverter {
 
+    private static final String DECISION_ID_FIELD = "decision_id";
+    private static final String PATH_FIELD = "path";
+    private static final String ACTION_FIELD = "action";
+    private static final String EMAIL_FIELD = "email";
+    private static final String RESULT_FIELD = "result";
+    private static final String INPUT_FILED = "input";
+
     private AuthorizationResultEnumConverter() {}
 
     public static AuthorizationLog convertLogAuthorizationRequest(JSONObject body) {
-        var inputObject = body.getJSONObject("input");
-        var result = body.getBoolean("result");
+        var inputObject = body.getJSONObject(INPUT_FILED);
+        var result = body.getBoolean(RESULT_FIELD);
 
         return new AuthorizationLog(
-                body.getString("decision_id"),
-                body.getString("path"),
-                inputObject.getString("action"),
-                inputObject.getString("email"),
+                body.getString(DECISION_ID_FIELD),
+                body.getString(PATH_FIELD),
+                inputObject.getString(ACTION_FIELD),
+                inputObject.getString(EMAIL_FIELD),
                 AuthorizationResultEnum.getByBoolean(result)
         );
     }

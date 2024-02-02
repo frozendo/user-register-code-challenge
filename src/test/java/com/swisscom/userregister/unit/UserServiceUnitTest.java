@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,13 +27,12 @@ class UserServiceUnitTest {
 
     private final UserRepository userRepository;
     private final OpaServerService opaServerService;
-    private final BCryptPasswordEncoder passwordEncoder;
     private final UserService userService;
 
     public UserServiceUnitTest() {
         this.userRepository = mock(UserRepository.class);
         this.opaServerService = mock(OpaServerService.class);
-        this.passwordEncoder = mock(BCryptPasswordEncoder.class);
+        var passwordEncoder = mock(BCryptPasswordEncoder.class);
         this.userService = new UserService(userRepository, opaServerService, passwordEncoder);
     }
 
